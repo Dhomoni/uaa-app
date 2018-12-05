@@ -1,0 +1,46 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="sdsl (generated)" id="1543765105902-2">
+        <createTable tableName="doctor">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="doctorPK"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="designation" type="VARCHAR(255)"/>
+            <column name="image" type="BLOB"/>
+            <column name="image_content_type" type="VARCHAR(255)"/>
+            <column name="licence_number" type="VARCHAR(255)"/>
+            <column name="national_id" type="VARCHAR(255)"/>
+            <column name="passport_no" type="VARCHAR(255)"/>
+            <column name="phone" type="VARCHAR(255)"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+		<createTable tableName="patient">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="patientPK"/>
+            </column>
+            <column name="image" type="BLOB"/>
+            <column name="image_content_type" type="VARCHAR(255)"/>
+            <column name="phone" type="VARCHAR(255)"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+        <addForeignKeyConstraint 
+        	baseColumnNames="user_id" 
+        	baseTableName="doctor" 
+        	constraintName="fk_doctor_user_id" 
+        	referencedColumnNames="id" 
+        	referencedTableName="jhi_user"
+        	onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" 
+        	baseTableName="patient" 
+        	constraintName="fk_patient_user_id" 
+        	referencedColumnNames="id" 
+        	referencedTableName="jhi_user"
+        	onDelete="CASCADE"/>
+    </changeSet>
+   
+    <changeSet author="sdsl (generated)" id="1543765105902-18">
+        
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,40 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.dhomoni.uaa",
+      "nativeLanguage": "en"
+    },
+    "jhipsterVersion": "5.6.1",
+    "applicationType": "uaa",
+    "baseName": "uaa",
+    "packageName": "com.dhomoni.uaa",
+    "packageFolder": "com/dhomoni/uaa",
+    "serverPort": "9999",
+    "authenticationType": "uaa",
+    "cacheProvider": "hazelcast",
+    "enableHibernateCache": true,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": "elasticsearch",
+    "messageBroker": "kafka",
+    "serviceDiscoveryType": "eureka",
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "NDE4OWEzYmZlMmEzN2Y3ZDE0MWMyY2Q2NGY0OWQzZTY3MGQ4ZGQ3Zjg1MGIwOTk4MzMzYzZiOTZjMDhkN2QxZjVjNjE1MWQzZTRjODMzZjQyN2FjMzhiNGU2YjczMWMwN2EzYjZhNjRmOWZlMGVhNWI2YjBhY2FlM2VmMDlkMGE=",
+    "testFrameworks": [
+      "gatling",
+      "cucumber"
+    ],
+    "jhiPrefix": "jhi",
+    "enableTranslation": true,
+    "clientPackageManager": "npm",
+    "nativeLanguage": "en",
+    "languages": [
+      "en",
+      "bn"
+    ],
+    "skipClient": true
+  }
+}
