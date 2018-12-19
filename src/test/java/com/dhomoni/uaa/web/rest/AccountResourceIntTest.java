@@ -1,21 +1,27 @@
 package com.dhomoni.uaa.web.rest;
 
-import com.dhomoni.uaa.UaaApp;
-import com.dhomoni.uaa.config.Constants;
-import com.dhomoni.uaa.domain.Authority;
-import com.dhomoni.uaa.domain.User;
-import com.dhomoni.uaa.repository.AuthorityRepository;
-import com.dhomoni.uaa.repository.UserRepository;
-import com.dhomoni.uaa.security.AuthoritiesConstants;
-import com.dhomoni.uaa.service.MailService;
-import com.dhomoni.uaa.service.UserService;
-import com.dhomoni.uaa.service.dto.PasswordChangeDTO;
-import com.dhomoni.uaa.service.dto.UserDTO;
-import com.dhomoni.uaa.web.rest.errors.ExceptionTranslator;
-import com.dhomoni.uaa.web.rest.vm.KeyAndPasswordVM;
-import com.dhomoni.uaa.web.rest.vm.ManagedUserVM;
-import org.apache.commons.lang3.RandomStringUtils;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,15 +39,29 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.dhomoni.uaa.UaaApp;
+import com.dhomoni.uaa.config.Constants;
+import com.dhomoni.uaa.domain.Authority;
+import com.dhomoni.uaa.domain.Degree;
+import com.dhomoni.uaa.domain.Doctor;
+import com.dhomoni.uaa.domain.Patient;
+import com.dhomoni.uaa.domain.Patient.BloodGroup;
+import com.dhomoni.uaa.domain.Patient.Sex;
+import com.dhomoni.uaa.domain.User;
+import com.dhomoni.uaa.repository.AuthorityRepository;
+import com.dhomoni.uaa.repository.DoctorRepository;
+import com.dhomoni.uaa.repository.PatientRepository;
+import com.dhomoni.uaa.repository.UserRepository;
+import com.dhomoni.uaa.security.AuthoritiesConstants;
+import com.dhomoni.uaa.service.MailService;
+import com.dhomoni.uaa.service.UserService;
+import com.dhomoni.uaa.service.dto.DoctorDTO;
+import com.dhomoni.uaa.service.dto.PasswordChangeDTO;
+import com.dhomoni.uaa.service.dto.PatientDTO;
+import com.dhomoni.uaa.service.dto.UserDTO;
+import com.dhomoni.uaa.web.rest.errors.ExceptionTranslator;
+import com.dhomoni.uaa.web.rest.vm.KeyAndPasswordVM;
+import com.dhomoni.uaa.web.rest.vm.ManagedUserVM;
 
 /**
  * Test class for the AccountResource REST controller.
@@ -54,6 +75,12 @@ public class AccountResourceIntTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+	private DoctorRepository doctorRepository;
+
+    @Autowired
+	private PatientRepository patientRepository;
+    
     @Autowired
     private AuthorityRepository authorityRepository;
 
@@ -148,6 +175,131 @@ public class AccountResourceIntTest {
     }
 
     @Test
+    @Transactional
+    @WithMockUser(username="existing-doctor-account", password="password", roles={"DOCTOR"})
+    public void testGetExistingDoctorAccount() throws Exception {
+        User user = new User();
+        user.setLogin("existing-doctor-account");
+        user.setFirstName("john");
+        user.setLastName("doe");
+        user.setEmail("existing-doctor-account@example.com");
+        user.setPassword(RandomStringUtils.random(60));
+        user.setImageUrl("http://placehold.it/50x50");
+        user.setLangKey("en");
+        user.setActivated(true);
+        Authority auth = new Authority();
+        auth.setName(AuthoritiesConstants.DOCTOR);
+        user.setAuthorities(Collections.singleton(auth));
+        Doctor doctor = new Doctor();
+        doctor.setPhone("8888123234355");
+        doctor.setType(1);
+        doctor.setDepartment(1);
+        doctor.setDescription("desc 1");
+        doctor.setDesignation("designation 1");
+        doctor.setLicenceNumber("1111122222");
+        doctor.setPassportNo("2222211111");
+        doctor.setNationalId("2222222222");
+        doctor.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        doctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        doctor.setImageContentType(Files.probeContentType(imagePath));
+        Degree degree = new Degree();
+        degree.setName("MBBS");
+        degree.setInstitute("Institute");
+        degree.setCountry("Bangladesh");
+        degree.setEnrollmentYear(1990);
+        degree.setPassingYear(1998);
+        doctor.setDegrees(Collections.singleton(degree));
+        doctor.setUser(user);
+        
+        when(mockUserService.getDoctorWithAuthoritiesAndDegrees()).thenReturn(Optional.of(doctor));
+
+        restUserMockMvc.perform(get("/api/account")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.login").value(user.getLogin()))
+            .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+            .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+            .andExpect(jsonPath("$.email").value(user.getEmail()))
+            .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
+            .andExpect(jsonPath("$.langKey").value(user.getLangKey()))
+            .andExpect(jsonPath("$.authorities").value(AuthoritiesConstants.DOCTOR))
+            .andExpect(jsonPath("$.phone").value(doctor.getPhone()))
+            .andExpect(jsonPath("$.address").value(doctor.getAddress()))
+            .andExpect(jsonPath("$.image").exists())
+            .andExpect(jsonPath("$.imageContentType").value(doctor.getImageContentType()))
+            .andExpect(jsonPath("$.doctorDTO.type").value(doctor.getType()))
+            .andExpect(jsonPath("$.doctorDTO.department").value(doctor.getDepartment()))
+            .andExpect(jsonPath("$.doctorDTO.description").value(doctor.getDescription()))
+            .andExpect(jsonPath("$.doctorDTO.designation").value(doctor.getDesignation()))
+            .andExpect(jsonPath("$.doctorDTO.licenceNumber").value(doctor.getLicenceNumber()))
+            .andExpect(jsonPath("$.doctorDTO.passportNo").value(doctor.getPassportNo()))
+            .andExpect(jsonPath("$.doctorDTO.nationalId").value(doctor.getNationalId()))
+            .andExpect(jsonPath("$.doctorDTO.degrees[0].name").value(degree.getName()))
+            .andExpect(jsonPath("$.doctorDTO.degrees[0].institute").value(degree.getInstitute()))
+            .andExpect(jsonPath("$.doctorDTO.degrees[0].country").value(degree.getCountry()))
+            .andExpect(jsonPath("$.doctorDTO.degrees[0].enrollmentYear").value(degree.getEnrollmentYear()))
+            .andExpect(jsonPath("$.doctorDTO.degrees[0].passingYear").value(degree.getPassingYear()));
+    }
+    
+    @Test
+    @Transactional
+    @WithMockUser(username="existing-patient-account", password="password", roles={"USER"})
+    public void testGetExistingPatientAccount() throws Exception {
+        Set<Authority> authorities = new HashSet<>();
+        Authority authority = new Authority();
+        authority.setName(AuthoritiesConstants.USER);
+        authorities.add(authority);
+        User user = new User();
+        user.setLogin("existing-patient-account");
+        user.setFirstName("john");
+        user.setLastName("doe");
+        user.setEmail("existing-patient-account@jhipster.com");
+        user.setImageUrl("http://placehold.it/50x50");
+        user.setLangKey("en");
+        user.setAuthorities(authorities);
+        Patient patient = new Patient();
+        patient.setPhone("8888123234355");
+        String timestamp = "2016-02-16 11:00:02";
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+        Instant birthTimestamp = Instant.from(formatter.parse(timestamp));
+        patient.setBirthTimestamp(birthTimestamp);
+        patient.setBloodGroup(BloodGroup.A_POSITIVE);
+        patient.setHeightInInch(70.0);
+        patient.setSex(Sex.MALE);
+        patient.setWeightInKG(70.0);
+        patient.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        patient.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        patient.setImageContentType(Files.probeContentType(imagePath));
+        patient.setUser(user);
+        
+        when(mockUserService.getPatientWithAuthorities()).thenReturn(Optional.of(patient));
+
+        restUserMockMvc.perform(get("/api/account")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.login").value(user.getLogin()))
+            .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+            .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+            .andExpect(jsonPath("$.email").value(user.getEmail()))
+            .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
+            .andExpect(jsonPath("$.langKey").value(user.getLangKey()))
+            .andExpect(jsonPath("$.authorities").value(AuthoritiesConstants.USER))
+            .andExpect(jsonPath("$.phone").value(patient.getPhone()))
+            .andExpect(jsonPath("$.address").value(patient.getAddress()))
+            .andExpect(jsonPath("$.image").exists())
+            .andExpect(jsonPath("$.imageContentType").value(patient.getImageContentType()))
+            .andExpect(jsonPath("$.patientDTO.birthTimestamp").value(patient.getBirthTimestamp().getEpochSecond()))
+            .andExpect(jsonPath("$.patientDTO.bloodGroup").value(patient.getBloodGroup().name()))
+            .andExpect(jsonPath("$.patientDTO.heightInInch").value(patient.getHeightInInch()))
+            .andExpect(jsonPath("$.patientDTO.sex").value(patient.getSex().toString()))
+            .andExpect(jsonPath("$.patientDTO.weightInKG").value(patient.getWeightInKG()));
+    }
+    
+    @Test
     public void testGetUnknownAccount() throws Exception {
         when(mockUserService.getUserWithAuthorities()).thenReturn(Optional.empty());
 
@@ -179,6 +331,100 @@ public class AccountResourceIntTest {
         assertThat(userRepository.findOneByLogin("test-register-valid").isPresent()).isTrue();
     }
 
+    // h2 geodb spatial extension already moved towards JTS 1.6.0 version supported by locationtech 
+    // whereas hibernate spatial that comes with spring boot jpa starter still using
+    // old jTS version 1.4.0 supported by vividsolutions. So for now I am
+    // ignoring to test location data against H2/GeoDB.
+    // Link: https://hibernate.atlassian.net/browse/HHH-12144
+    @Test
+    @Transactional
+    public void testDoctorRegisterValid() throws Exception {
+        ManagedUserVM validDoctor = new ManagedUserVM();
+        validDoctor.setLogin("test-doctor-register-valid");
+        validDoctor.setPassword("password");
+        validDoctor.setFirstName("Pervez");
+        validDoctor.setLastName("Sajjad");
+        validDoctor.setEmail("test-doctor-register-valid@example.com");
+        validDoctor.setImageUrl("http://placehold.it/50x50");
+        validDoctor.setLangKey(Constants.DEFAULT_LANGUAGE);
+        validDoctor.setAuthorities(Collections.singleton(AuthoritiesConstants.DOCTOR));
+        validDoctor.setPhone("8888123234355");
+        validDoctor.setAddress("Dhanmondi");
+//        GeometryFactory gf=new GeometryFactory();
+//        Point point=gf.createPoint(new Coordinate(90.4125, 23.8103));
+//        validDoctor.setLocation(point);
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        validDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        validDoctor.setImageContentType(Files.probeContentType(imagePath));
+        DoctorDTO doctorDTO = new DoctorDTO();        
+        doctorDTO.setType(1);
+        doctorDTO.setDepartment(1);
+        doctorDTO.setDescription("Desc");
+        doctorDTO.setDesignation("doctor designation");
+        doctorDTO.setLicenceNumber("434243434155");
+        doctorDTO.setNationalId("4545646456234");
+        doctorDTO.setPassportNo("89787655673423");
+        Degree degree = new Degree();
+        degree.setName("MBBS");
+        degree.setInstitute("Institute");
+        degree.setCountry("Bangladesh");
+        degree.setEnrollmentYear(1990);
+        degree.setPassingYear(1998);
+        doctorDTO.setDegrees(Collections.singleton(degree));
+        validDoctor.setDoctorDTO(doctorDTO);
+        assertThat(userRepository.findOneByLogin("test-doctor-register-valid").isPresent()).isFalse();
+
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(validDoctor)))
+            .andExpect(status().isCreated());
+
+        Optional<User> newUser = userRepository.findOneByLogin("test-doctor-register-valid");
+        assertThat(newUser.isPresent()).isTrue();
+        Optional<Doctor> newDoctor = doctorRepository.findOneByUser(newUser.get());
+        assertThat(newDoctor.isPresent()).isTrue();
+        assertThat(newDoctor.get().getDegrees().size()).isEqualTo(1);
+    }
+    
+    @Test
+    @Transactional
+    public void testPatientRegisterValid() throws Exception {
+        ManagedUserVM validPatient = new ManagedUserVM();
+        validPatient.setLogin("test-patient-register-valid");
+        validPatient.setPassword("password");
+        validPatient.setFirstName("Arhan");
+        validPatient.setLastName("Sajjad");
+        validPatient.setEmail("test-patient-register-valid@example.com");
+        validPatient.setImageUrl("http://placehold.it/50x50");
+        validPatient.setLangKey(Constants.DEFAULT_LANGUAGE);
+        validPatient.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
+        validPatient.setPhone("8888123234355");
+        validPatient.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        validPatient.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        validPatient.setImageContentType(Files.probeContentType(imagePath));
+        PatientDTO patientDTO = new PatientDTO();
+        String timestamp = "2016-02-16 11:00:02";
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+        Instant birthTimestamp = Instant.from(formatter.parse(timestamp));
+        patientDTO.setBirthTimestamp(birthTimestamp);
+        patientDTO.setBloodGroup(BloodGroup.A_POSITIVE);
+        patientDTO.setHeightInInch(70.0);
+        patientDTO.setSex(Sex.MALE);
+        patientDTO.setWeightInKG(70.0);
+        validPatient.setPatientDTO(patientDTO);
+        assertThat(userRepository.findOneByLogin("test-patient-register-valid").isPresent()).isFalse();
+
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(validPatient)))
+            .andExpect(status().isCreated());
+
+        assertThat(userRepository.findOneByLogin("test-patient-register-valid").isPresent()).isTrue();
+    }
+    
     @Test
     @Transactional
     public void testRegisterInvalidLogin() throws Exception {
@@ -250,6 +496,43 @@ public class AccountResourceIntTest {
         Optional<User> user = userRepository.findOneByLogin("bob");
         assertThat(user.isPresent()).isFalse();
     }
+    
+    @Test
+    @Transactional
+    public void testDoctorRegisterInvalidLicenceNumber() throws Exception {
+        ManagedUserVM invalidDoctor = new ManagedUserVM();
+        invalidDoctor.setLogin("pervez");
+        invalidDoctor.setPassword("password");
+        invalidDoctor.setFirstName("Pervez");
+        invalidDoctor.setLastName("Sajjad");
+        invalidDoctor.setEmail("pervez@example.com");
+        invalidDoctor.setImageUrl("http://placehold.it/50x50");
+        invalidDoctor.setLangKey(Constants.DEFAULT_LANGUAGE);
+        invalidDoctor.setAuthorities(Collections.singleton(AuthoritiesConstants.DOCTOR));
+        invalidDoctor.setPhone("11112222345");
+        invalidDoctor.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        invalidDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
+        DoctorDTO doctorDTO = new DoctorDTO();        
+        doctorDTO.setType(1);
+        doctorDTO.setDepartment(1);
+        doctorDTO.setDescription("Desc");
+        doctorDTO.setDesignation("doctor designation");
+        doctorDTO.setLicenceNumber("qwe");  // invalid licence number
+        doctorDTO.setNationalId("4545646456234");
+        doctorDTO.setPassportNo("89787655673423");
+        invalidDoctor.setDoctorDTO(doctorDTO);
+        assertThat(userRepository.findOneByLogin("test-doctor-register-valid").isPresent()).isFalse();
+
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(invalidDoctor)))
+            .andExpect(status().isBadRequest());
+
+        assertThat(userRepository.findOneByLogin("pervez").isPresent()).isFalse();
+    }
 
     @Test
     @Transactional
@@ -273,6 +556,71 @@ public class AccountResourceIntTest {
 
         Optional<User> user = userRepository.findOneByLogin("bob");
         assertThat(user.isPresent()).isFalse();
+    }
+    
+    @Test
+    @Transactional
+    public void testDoctorRegisterNullLicenceNumber() throws Exception {
+        ManagedUserVM invalidDoctor = new ManagedUserVM();
+        invalidDoctor.setLogin("pervez");
+        invalidDoctor.setPassword("password");
+        invalidDoctor.setFirstName("Pervez");
+        invalidDoctor.setLastName("Sajjad");
+        invalidDoctor.setEmail("pervez@example.com");
+        invalidDoctor.setImageUrl("http://placehold.it/50x50");
+        invalidDoctor.setLangKey(Constants.DEFAULT_LANGUAGE);
+        invalidDoctor.setAuthorities(Collections.singleton(AuthoritiesConstants.DOCTOR));
+        invalidDoctor.setPhone("11112222345");
+        invalidDoctor.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        invalidDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
+        DoctorDTO doctorDTO = new DoctorDTO();        
+        doctorDTO.setType(1);
+        doctorDTO.setDepartment(1);
+        doctorDTO.setDescription("Desc");
+        doctorDTO.setDesignation("doctor designation");
+        doctorDTO.setLicenceNumber(null);  // null licence number
+        doctorDTO.setNationalId("4545646456234");
+        doctorDTO.setPassportNo("89787655673423");
+        invalidDoctor.setDoctorDTO(doctorDTO);
+        assertThat(userRepository.findOneByLogin("test-doctor-register-valid").isPresent()).isFalse();
+
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(invalidDoctor)))
+            .andExpect(status().isBadRequest());
+
+        assertThat(userRepository.findOneByLogin("pervez").isPresent()).isFalse();
+    }
+    
+    @Test
+    @Transactional
+    public void testDoctorRegisterWithoutData() throws Exception {
+        ManagedUserVM invalidDoctor = new ManagedUserVM();
+        invalidDoctor.setLogin("pervez_invalid");
+        invalidDoctor.setPassword("password");
+        invalidDoctor.setFirstName("Pervez");
+        invalidDoctor.setLastName("Sajjad");
+        invalidDoctor.setEmail("pervez_invalid@example.com");
+        invalidDoctor.setImageUrl("http://placehold.it/50x50");
+        invalidDoctor.setLangKey(Constants.DEFAULT_LANGUAGE);
+        invalidDoctor.setAuthorities(Collections.singleton(AuthoritiesConstants.DOCTOR));
+        invalidDoctor.setPhone("11112222345");
+        invalidDoctor.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        invalidDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
+        assertThat(userRepository.findOneByLogin("test-doctor-register-valid").isPresent()).isFalse();
+
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(invalidDoctor)))
+            .andExpect(status().isBadRequest());
+
+        assertThat(userRepository.findOneByLogin("pervez_invalid").isPresent()).isFalse();
     }
 
     @Test
@@ -412,6 +760,88 @@ public class AccountResourceIntTest {
                 .content(TestUtil.convertObjectToJsonBytes(secondUser)))
             .andExpect(status().is4xxClientError());
     }
+    
+    @Test
+    @Transactional
+    public void testDoctorRegisterDuplicateLicenceNumber() throws Exception {
+    	// First doctor
+        ManagedUserVM firstDoctor = new ManagedUserVM();
+        firstDoctor.setLogin("test-duplicate-licence-number");
+        firstDoctor.setPassword("password");
+        firstDoctor.setFirstName("Pervez");
+        firstDoctor.setLastName("Sajjad");
+        firstDoctor.setEmail("test-duplicate-licence-number@example.com");
+        firstDoctor.setImageUrl("http://placehold.it/50x50");
+        firstDoctor.setLangKey(Constants.DEFAULT_LANGUAGE);
+        firstDoctor.setAuthorities(Collections.singleton(AuthoritiesConstants.DOCTOR));
+        firstDoctor.setPhone("11112222345");
+        firstDoctor.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        firstDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        firstDoctor.setImageContentType(Files.probeContentType(imagePath));
+        DoctorDTO doctorDTO = new DoctorDTO();        
+        doctorDTO.setType(1);
+        doctorDTO.setDepartment(1);
+        doctorDTO.setDescription("Desc");
+        doctorDTO.setDesignation("doctor designation");
+        doctorDTO.setLicenceNumber("434243434155");
+        doctorDTO.setNationalId("4545646456234");
+        doctorDTO.setPassportNo("89787655673423");
+        firstDoctor.setDoctorDTO(doctorDTO);
+        assertThat(userRepository.findOneByLogin("test-duplicate-licence-number").isPresent()).isFalse();
+
+        // Register first doctor
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(firstDoctor)))
+            .andExpect(status().isCreated());
+        
+        Optional<User> testUser1 = userRepository.findOneByLogin("test-duplicate-licence-number");
+        assertThat(testUser1.isPresent()).isTrue();
+        
+        // Duplicate license number, different login
+        ManagedUserVM secondDoctor = new ManagedUserVM();
+        secondDoctor.setLogin("test-duplicate-licence-number-2");
+        secondDoctor.setPassword(firstDoctor.getPassword());
+        secondDoctor.setFirstName(firstDoctor.getFirstName());
+        secondDoctor.setLastName(firstDoctor.getLastName());
+        secondDoctor.setEmail("test-duplicate-licence-number-2@example.com");
+        secondDoctor.setImageUrl(firstDoctor.getImageUrl());
+        secondDoctor.setLangKey(firstDoctor.getLangKey());
+        secondDoctor.setCreatedBy(firstDoctor.getCreatedBy());
+        secondDoctor.setCreatedDate(firstDoctor.getCreatedDate());
+        secondDoctor.setLastModifiedBy(firstDoctor.getLastModifiedBy());
+        secondDoctor.setLastModifiedDate(firstDoctor.getLastModifiedDate());
+        secondDoctor.setAuthorities(new HashSet<>(firstDoctor.getAuthorities()));
+        secondDoctor.setAddress(firstDoctor.getAddress());
+        secondDoctor.setImage(firstDoctor.getImage());
+        secondDoctor.setImageContentType(firstDoctor.getImageContentType());
+        secondDoctor.setDoctorDTO(doctorDTO);
+        
+        // Register second (non activated) user
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(secondDoctor)))
+            .andExpect(status().isCreated());
+
+        testUser1 = userRepository.findOneByLogin("test-duplicate-licence-number");
+        assertThat(testUser1.isPresent()).isFalse();
+
+        Optional<User> testUser2 = userRepository.findOneByLogin("test-duplicate-licence-number-2");
+        assertThat(testUser2.isPresent()).isTrue();
+
+        testUser2.get().setActivated(true);
+        userService.updateUser((new UserDTO(testUser2.get())));
+        
+        // Register 3rd (already activated) user
+        restMvc.perform(
+            post("/api/register")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(firstDoctor)))
+            .andExpect(status().is4xxClientError());
+    }
 
     @Test
     @Transactional
@@ -504,7 +934,152 @@ public class AccountResourceIntTest {
         assertThat(updatedUser.getActivated()).isEqualTo(true);
         assertThat(updatedUser.getAuthorities()).isEmpty();
     }
+    
+    @Test
+    @Transactional
+    @WithMockUser("save-doctor-account")
+    public void testSaveDoctorAccount() throws Exception {
+    	
+        User user = new User();
+        user.setLogin("save-doctor-account");
+        user.setEmail("save-doctor-account@example.com");
+        user.setPassword(RandomStringUtils.random(60));
+        user.setActivated(true);
+        Authority auth = new Authority();
+        auth.setName(AuthoritiesConstants.DOCTOR);
+        user.setAuthorities(Collections.singleton(auth));
 
+        User newUser = userRepository.saveAndFlush(user);
+    	
+        ManagedUserVM doctor = new ManagedUserVM();
+        doctor.setLogin("save-doctor-account");
+        doctor.setPassword("password");
+        doctor.setFirstName("Pervez");
+        doctor.setLastName("Sajjad");
+        doctor.setEmail("save-doctor-account@example.com");
+        doctor.setImageUrl("http://placehold.it/50x50");
+        doctor.setLangKey(Constants.DEFAULT_LANGUAGE);
+        doctor.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));   // trying with different roles which should be ignored.
+        doctor.setPhone("11112222345");
+        doctor.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        doctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        doctor.setImageContentType(Files.probeContentType(imagePath));
+        DoctorDTO doctorDTO = new DoctorDTO();        
+        doctorDTO.setType(1);
+        doctorDTO.setDepartment(1);
+        doctorDTO.setDescription("Desc");
+        doctorDTO.setDesignation("doctor designation");
+        doctorDTO.setLicenceNumber("434243434155");
+        doctorDTO.setNationalId("4545646456234");
+        doctorDTO.setPassportNo("89787655673423");
+        Degree degree = new Degree();
+        degree.setName("MBBS");
+        degree.setInstitute("Institute");
+        degree.setCountry("Bangladesh");
+        degree.setEnrollmentYear(1990);
+        degree.setPassingYear(1998);
+        doctorDTO.setDegrees(Collections.singleton(degree));
+        doctor.setDoctorDTO(doctorDTO);
+
+        restMvc.perform(
+            post("/api/account")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(doctor)))
+            .andExpect(status().isOk());
+
+        Doctor updatedDoctor = doctorRepository.findOneByUser(newUser).orElse(null);
+        User updatedUser = updatedDoctor.getUser();
+        assertThat(updatedUser.getFirstName()).isEqualTo(doctor.getFirstName());
+        assertThat(updatedUser.getLastName()).isEqualTo(doctor.getLastName());
+        assertThat(updatedUser.getEmail()).isEqualTo(doctor.getEmail());
+        assertThat(updatedUser.getLangKey()).isEqualTo(doctor.getLangKey());
+        assertThat(updatedUser.getPassword()).isEqualTo(user.getPassword());
+        assertThat(updatedUser.getImageUrl()).isEqualTo(doctor.getImageUrl());
+        assertThat(updatedUser.getActivated()).isEqualTo(true);
+        assertThat(updatedDoctor.getPhone()).isEqualTo(doctor.getPhone());
+        assertThat(updatedDoctor.getAddress()).isEqualTo(doctor.getAddress());
+        assertThat(updatedDoctor.getImage()).isEqualTo(doctor.getImage());
+        assertThat(updatedDoctor.getImageContentType()).isEqualTo(doctor.getImageContentType());
+        assertThat(updatedDoctor.getType()).isEqualTo(doctorDTO.getType());
+        assertThat(updatedDoctor.getDepartment()).isEqualTo(doctorDTO.getDepartment());
+        assertThat(updatedDoctor.getDescription()).isEqualTo(doctorDTO.getDescription());
+        assertThat(updatedDoctor.getDesignation()).isEqualTo(doctorDTO.getDesignation());
+        assertThat(updatedDoctor.getLicenceNumber()).isEqualTo(doctorDTO.getLicenceNumber());
+        assertThat(updatedDoctor.getNationalId()).isEqualTo(doctorDTO.getNationalId());
+        assertThat(updatedDoctor.getDegrees().size()).isEqualTo(doctorDTO.getDegrees().size());
+        assertThat(updatedDoctor.getPassportNo()).isEqualTo(doctorDTO.getPassportNo());
+        assertThat(updatedUser.getAuthorities()).isEqualTo(user.getAuthorities());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser("save-patient-account")
+    public void testSavePatientAccount() throws Exception {
+    	
+        User user = new User();
+        user.setLogin("save-patient-account");
+        user.setEmail("save-patient-account@example.com");
+        user.setPassword(RandomStringUtils.random(60));
+        user.setActivated(true);
+        Authority auth = new Authority();
+        auth.setName(AuthoritiesConstants.USER);
+        user.setAuthorities(Collections.singleton(auth));
+
+        User newUser = userRepository.saveAndFlush(user);
+    	
+        ManagedUserVM patient = new ManagedUserVM();
+        patient.setLogin("save-patient-account");
+        patient.setPassword("password");
+        patient.setFirstName("Pervez");
+        patient.setLastName("Sajjad");
+        patient.setEmail("save-patient-account@example.com");
+        patient.setImageUrl("http://placehold.it/50x50");
+        patient.setLangKey(Constants.DEFAULT_LANGUAGE);
+        patient.setAuthorities(Collections.singleton(AuthoritiesConstants.ADMIN));   // trying with different roles which should be ignored.
+        patient.setPhone("11112222345");
+        patient.setAddress("Dhanmondi");
+        Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
+        patient.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+        patient.setImageContentType(Files.probeContentType(imagePath));
+        PatientDTO patientDTO = new PatientDTO();
+        String timestamp = "2016-02-16 11:00:02";
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+        Instant birthTimestamp = Instant.from(formatter.parse(timestamp));
+        patientDTO.setBirthTimestamp(birthTimestamp);
+        patientDTO.setBloodGroup(BloodGroup.A_NEGATIVE);
+        patientDTO.setHeightInInch(70.0);
+        patientDTO.setSex(Sex.MALE);
+        patientDTO.setWeightInKG(70.0);
+        patient.setPatientDTO(patientDTO);
+
+        restMvc.perform(
+            post("/api/account")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(patient)))
+            .andExpect(status().isOk());
+
+        Patient updatedPatient = patientRepository.findOneByUser(newUser).orElse(null);
+        User updatedUser = updatedPatient.getUser();
+        assertThat(updatedUser.getFirstName()).isEqualTo(patient.getFirstName());
+        assertThat(updatedUser.getLastName()).isEqualTo(patient.getLastName());
+        assertThat(updatedUser.getEmail()).isEqualTo(patient.getEmail());
+        assertThat(updatedUser.getLangKey()).isEqualTo(patient.getLangKey());
+        assertThat(updatedUser.getPassword()).isEqualTo(user.getPassword());
+        assertThat(updatedUser.getImageUrl()).isEqualTo(patient.getImageUrl());
+        assertThat(updatedUser.getActivated()).isEqualTo(true);
+        assertThat(updatedPatient.getPhone()).isEqualTo(patient.getPhone());
+        assertThat(updatedPatient.getAddress()).isEqualTo(patient.getAddress());
+        assertThat(updatedPatient.getImage()).isEqualTo(patient.getImage());
+        assertThat(updatedPatient.getImageContentType()).isEqualTo(patient.getImageContentType());
+        assertThat(updatedPatient.getBirthTimestamp()).isEqualTo(patientDTO.getBirthTimestamp());
+        assertThat(updatedPatient.getBloodGroup()).isEqualTo(patientDTO.getBloodGroup());
+        assertThat(updatedPatient.getHeightInInch()).isEqualTo(patientDTO.getHeightInInch());
+        assertThat(updatedPatient.getSex()).isEqualTo(patientDTO.getSex());
+        assertThat(updatedPatient.getWeightInKG()).isEqualTo(patientDTO.getWeightInKG());
+        assertThat(updatedUser.getAuthorities()).isEqualTo(user.getAuthorities());
+    }
+    
     @Test
     @Transactional
     @WithMockUser("save-invalid-email")
@@ -793,7 +1368,6 @@ public class AccountResourceIntTest {
         User updatedUser = userRepository.findOneByLogin(user.getLogin()).orElse(null);
         assertThat(passwordEncoder.matches(keyAndPassword.getNewPassword(), updatedUser.getPassword())).isFalse();
     }
-
 
     @Test
     @Transactional

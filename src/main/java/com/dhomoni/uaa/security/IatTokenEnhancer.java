@@ -26,11 +26,11 @@ public class IatTokenEnhancer implements TokenEnhancer {
         DefaultOAuth2AccessToken token = accessToken;
         Map<String, Object> additionalInformation = token.getAdditionalInformation();
         if (additionalInformation.isEmpty()) {
-            additionalInformation = new LinkedHashMap<String, Object>();
+            additionalInformation = new LinkedHashMap<>();
         }
         //add "iat" claim with current time in secs
         //this is used for an inactive session timeout
-        additionalInformation.put("iat", new Integer((int)(System.currentTimeMillis()/1000L)));
+        additionalInformation.put("iat", Integer.valueOf((int)(System.currentTimeMillis()/1000L)));
         token.setAdditionalInformation(additionalInformation);
     }
 }

@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:spatial="http://www.liquibase.org/xml/ns/dbchangelog-ext/liquibase-spatial"
     xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
-                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext 
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext/liquibase-spatial 
+    http://lonnyj.github.com/liquibase-spatial/liquibase-spatial.xsd">
 
-    <changeSet id="00000000000000" author="jhipster">
+    <changeSet id="spatial_db" author="pervez" dbms="h2">
+    	<sql dbms="h2">CREATE ALIAS InitGeoDB for "geodb.GeoDB.InitGeoDB"</sql>
+    	<sql dbms="h2">CALL InitGeoDB()</sql>
+    	<rollback>
+        	<sql dbms="h2">DROP ALIAS InitGeoDB</sql>
+    	</rollback>
+	</changeSet>
+	
+	<changeSet id="00000000000000" author="jhipster">
         <createSequence sequenceName="hibernate_sequence" startValue="1000" incrementBy="50"/>
     </changeSet>
 

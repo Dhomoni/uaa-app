@@ -1,25 +1,30 @@
 package com.dhomoni.uaa.service.dto;
 
-import com.dhomoni.uaa.config.Constants;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.dhomoni.uaa.config.Constants;
 import com.dhomoni.uaa.domain.Authority;
 import com.dhomoni.uaa.domain.Doctor;
 import com.dhomoni.uaa.domain.Patient;
 import com.dhomoni.uaa.domain.User;
+import com.dhomoni.uaa.security.AuthoritiesConstants;
+import com.vividsolutions.jts.geom.Point;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.*;
-import java.time.Instant;
-import java.util.Set;
-import java.util.stream.Collectors;
+import lombok.Data;
 
 /**
- * A DTO representing a user, with his authorities.
+ * A DTO representing a user (doctor + patient), with his authorities.
  */
+@Data
 public class UserDTO {
-
     private Long id;
 
     @NotBlank
@@ -55,27 +60,25 @@ public class UserDTO {
 
     private Set<String> authorities;
     
-    @Pattern(regexp = "^(?:[0-9] ?){6,14}[0-9]$")
+    @Pattern(regexp = Constants.PHONE_REGEX)
     private String phone;
-	
-    private String licenceNumber;
-
-    private String nationalId;
-    
-    private String passportNo;
-    
-    private String designation;
-
-    private String description;
     
     private byte[] image;
 
     private String imageContentType;
+    
+    private String address;
+    
+    private Point location;
+    
+    DoctorDTO doctorDTO;
+    
+    PatientDTO patientDTO;
 
     public UserDTO() {
-        // Empty constructor needed for Jackson.
+    	// for jackson
     }
-
+    
     public UserDTO(User user) {
         this.id = user.getId();
         this.login = user.getLogin();
@@ -97,13 +100,20 @@ public class UserDTO {
     public UserDTO(Doctor doctor) {
     	this(doctor.getUser());
     	this.phone = doctor.getPhone();
-    	this.licenceNumber = doctor.getLicenceNumber();
-    	this.nationalId = doctor.getNationalId();
-    	this.passportNo = doctor.getPassportNo();
-    	this.designation = doctor.getDesignation();
-    	this.description = doctor.getDescription();
     	this.image = doctor.getImage();
     	this.imageContentType = doctor.getImageContentType();
+    	this.address = doctor.getAddress();
+    	this.location = doctor.getLocation();
+    	this.doctorDTO = new DoctorDTO();
+    	this.doctorDTO.setId(doctor.getId());
+    	this.doctorDTO.setLicenceNumber(doctor.getLicenceNumber());
+    	this.doctorDTO.setNationalId(doctor.getNationalId());
+    	this.doctorDTO.setPassportNo(doctor.getPassportNo());
+    	this.doctorDTO.setDesignation(doctor.getDesignation());
+    	this.doctorDTO.setType(doctor.getType());
+    	this.doctorDTO.setDepartment(doctor.getDepartment());
+    	this.doctorDTO.setDescription(doctor.getDescription());
+    	this.doctorDTO.setDegrees(doctor.getDegrees());
     }
 
     public UserDTO(Patient patient) {
@@ -111,191 +121,27 @@ public class UserDTO {
     	this.phone = patient.getPhone();
     	this.image = patient.getImage();
     	this.imageContentType = patient.getImageContentType();
+    	this.address = patient.getAddress();
+    	this.location = patient.getLocation();
+    	this.patientDTO = new PatientDTO();
+    	this.patientDTO.setId(patient.getId());
+    	this.patientDTO.setBloodGroup(patient.getBloodGroup());
+    	this.patientDTO.setSex(patient.getSex());
+    	this.patientDTO.setBirthTimestamp(patient.getBirthTimestamp());
+    	this.patientDTO.setWeightInKG(patient.getWeightInKG());
+    	this.patientDTO.setHeightInInch(patient.getHeightInInch());
     }
     
-    public Long getId() {
-        return id;
+    public boolean hasDoctorAuthority() {
+    	return authorities!=null 
+    			&& authorities.contains(AuthoritiesConstants.DOCTOR);
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public boolean isActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
-    }
-
-    public String getLangKey() {
-        return langKey;
-    }
-
-    public void setLangKey(String langKey) {
-        this.langKey = langKey;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Instant getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public Set<String> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Set<String> authorities) {
-        this.authorities = authorities;
-    }
-
-    @Override
-    public String toString() {
-        return "UserDTO{" +
-            "login='" + login + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
-            ", email='" + email + '\'' +
-            ", imageUrl='" + imageUrl + '\'' +
-            ", activated=" + activated +
-            ", langKey='" + langKey + '\'' +
-            ", createdBy=" + createdBy +
-            ", createdDate=" + createdDate +
-            ", lastModifiedBy='" + lastModifiedBy + '\'' +
-            ", lastModifiedDate=" + lastModifiedDate +
-            ", authorities=" + authorities +
-            "}";
-    }
-
-	public String getPhone() {
-		return phone;
+    
+	public Optional<DoctorDTO> getDoctorDTO() {
+		return Optional.ofNullable(this.doctorDTO);
 	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
-	public String getLicenceNumber() {
-		return licenceNumber;
-	}
-
-	public void setLicenceNumber(String licenceNumber) {
-		this.licenceNumber = licenceNumber;
-	}
-
-	public String getNationalId() {
-		return nationalId;
-	}
-
-	public void setNationalId(String nationalId) {
-		this.nationalId = nationalId;
-	}
-
-	public String getPassportNo() {
-		return passportNo;
-	}
-
-	public void setPassportNo(String passportNo) {
-		this.passportNo = passportNo;
-	}
-
-	public String getDesignation() {
-		return designation;
-	}
-
-	public void setDesignation(String designation) {
-		this.designation = designation;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public byte[] getImage() {
-		return image;
-	}
-
-	public void setImage(byte[] image) {
-		this.image = image;
-	}
-
-	public String getImageContentType() {
-		return imageContentType;
-	}
-
-	public void setImageContentType(String imageContentType) {
-		this.imageContentType = imageContentType;
+	
+	public Optional<PatientDTO> getPatientDTO() {
+		return Optional.ofNullable(this.patientDTO);
 	}
 }

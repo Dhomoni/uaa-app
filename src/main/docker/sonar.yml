@@ -2,6 +2,7 @@ version: '2'
 services:
     uaa-sonar:
         image: sonarqube:7.1
+        restart: always
         ports:
             - 9001:9000
-            - 9092:9092
+            - 10000:9092

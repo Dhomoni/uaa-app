@@ -1,6 +1,9 @@
 package com.dhomoni.uaa.domain;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,78 +11,81 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.dhomoni.uaa.config.Constants;
+import com.vividsolutions.jts.geom.Point;
+
+import lombok.Data;
+
 @Entity
 @Table(name = "patient")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Data
 public class Patient implements Serializable {
-    
+
 	private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
-    
-    @Pattern(regexp = "^(?:[0-9] ?){6,14}[0-9]$")
-    private String phone;
-
-    @Lob
-    @Column(name = "image")
-    private byte[] image;
-
-    @Column(name = "image_content_type")
-    private String imageContentType;
-
-    @OneToOne
-    private User user;
-
-	public Long getId() {
-		return id;
+	public enum Sex {
+		MALE, FEMALE
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column( columnDefinition = "uuid")
+	private UUID id;
 
-	public byte[] getImage() {
-		return image;
-	}
+	@Pattern(regexp = Constants.PHONE_REGEX)
+	private String phone;
 
-	public void setImage(byte[] image) {
-		this.image = image;
-	}
+	@Column(name = "sex")
+	private Sex sex;
 
-	public String getImageContentType() {
-		return imageContentType;
-	}
+	@Column(name = "birth_timestamp")
+	private Instant birthTimestamp;
 
-	public void setImageContentType(String imageContentType) {
-		this.imageContentType = imageContentType;
-	}
+	@Column(name = "blood_group")
+	private BloodGroup bloodGroup;
 
-	public User getUser() {
-		return user;
-	}
+	@Column(name = "weight_in_kg")
+	private Double weightInKG;
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+	@Column(name = "height_in_inch")
+	private Double heightInInch;
 
-	public String getPhone() {
-		return phone;
-	}
+	@Lob
+	@Column(name = "image")
+	private byte[] image;
 
-	public void setPhone(String phone) {
-		this.phone = phone;
+	@Column(name = "image_content_type")
+	private String imageContentType;
+
+	@Column(name = "address")
+	private String address;
+
+	@Column(name = "GEOM", columnDefinition = "GEOMETRY")
+	private Point location;
+
+	@OneToOne
+	private User user;
+
+	public enum BloodGroup {
+		A_POSITIVE("A+"), A_NEGATIVE("A-"), B_POSITIVE("B+"), B_NEGATIVE("B-"), AB_POSITIVE("AB+"), AB_NEGATIVE("AB-"),
+		O_NEGATIVE("O-"), O_POSITIVE("O+");
+
+		private final String label;
+
+		private BloodGroup(String label) {
+			this.label = label;
+		}
+
+		@Override
+		public String toString() {
+			return label;
+		}
 	}
 }

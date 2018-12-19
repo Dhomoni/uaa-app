@@ -19,10 +19,9 @@ import java.time.Instant;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     String USERS_BY_LOGIN_CACHE = "usersByLogin";
+	String USERS_BY_EMAIL_CACHE = "usersByEmail";
 
-    String USERS_BY_EMAIL_CACHE = "usersByEmail";
-
-    Optional<User> findOneByActivationKey(String activationKey);
+	Optional<User> findOneByActivationKey(String activationKey);
 
     List<User> findAllByActivatedIsFalseAndCreatedDateBefore(Instant dateTime);
 

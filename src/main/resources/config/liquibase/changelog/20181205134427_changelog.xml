@@ -1,0 +1,82 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:spatial="http://www.liquibase.org/xml/ns/dbchangelog-ext/liquibase-spatial"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext 
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
+	http://www.liquibase.org/xml/ns/dbchangelog 
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+	http://www.liquibase.org/xml/ns/dbchangelog-ext/liquibase-spatial 
+    http://lonnyj.github.com/liquibase-spatial/liquibase-spatial.xsd">    
+    
+    <changeSet author="sdsl (generated)" id="1545137949181-2">
+        <createTable tableName="degree">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="degreePK"/>
+            </column>
+            <column name="country" type="VARCHAR(255)"/>
+            <column name="enrollment_year" type="INT"/>
+            <column name="institute" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="passing_year" type="INT"/>
+            <column name="doctor_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sdsl (generated)" id="1544017479328-2">
+    	<createTable tableName="DOCTOR">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="INT"/>
+            <column name="department" type="INT"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="designation" type="VARCHAR(255)"/>
+            <column name="image" type="BLOB"/>
+            <column name="image_content_type" type="VARCHAR(255)"/>
+            <column name="licence_number" type="VARCHAR(255)"/>
+            <column name="GEOM" type="GEOMETRY(Point, 4326)"/>
+            <column name="national_id" type="VARCHAR(255)"/>
+            <column name="passport_no" type="VARCHAR(255)"/>
+            <column name="phone" type="VARCHAR(255)"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>        
+    </changeSet>
+    <changeSet author="sdsl (generated)" id="1544017479328-8">
+        <createTable tableName="PATIENT">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="birth_timestamp" type="TIMESTAMP"/>
+            <column name="blood_group" type="INT"/>
+            <column name="sex" type="INT"/>
+            <column name="weight_in_kg" type="DOUBLE"/>
+            <column name="height_in_inch" type="DOUBLE"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="image" type="BLOB"/>
+            <column name="image_content_type" type="VARCHAR(255)"/>
+            <column name="GEOM" type="GEOMETRY(Point, 4326)"/>
+            <column name="phone" type="VARCHAR(255)"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sdsl (generated)" id="1544017479328-17">
+        <addForeignKeyConstraint 
+        	baseColumnNames="user_id" 
+        	baseTableName="doctor" 
+        	constraintName="fk_doctor_user_id" 
+        	referencedColumnNames="id" 
+        	referencedTableName="jhi_user"
+        	onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="sdsl (generated)" id="1544017479328-18">
+        <addForeignKeyConstraint 
+        	baseColumnNames="user_id" 
+        	baseTableName="patient" 
+        	constraintName="fk_patient_user_id" 
+        	referencedColumnNames="id" 
+        	referencedTableName="jhi_user"
+        	onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

@@ -56,13 +56,10 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
 
         private final TokenStore tokenStore;
 
-        private final JHipsterProperties jHipsterProperties;
-
         private final CorsFilter corsFilter;
 
-        public ResourceServerConfiguration(TokenStore tokenStore, JHipsterProperties jHipsterProperties, CorsFilter corsFilter) {
+        public ResourceServerConfiguration(TokenStore tokenStore, CorsFilter corsFilter) {
             this.tokenStore = tokenStore;
-            this.jHipsterProperties = jHipsterProperties;
             this.corsFilter = corsFilter;
         }
 

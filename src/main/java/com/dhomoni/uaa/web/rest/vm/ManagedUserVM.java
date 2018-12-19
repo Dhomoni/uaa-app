@@ -1,11 +1,17 @@
 package com.dhomoni.uaa.web.rest.vm;
 
-import com.dhomoni.uaa.service.dto.UserDTO;
 import javax.validation.constraints.Size;
+
+import com.dhomoni.uaa.service.dto.UserDTO;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * View Model extending the UserDTO, which is meant to be used in the user management UI.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class ManagedUserVM extends UserDTO {
 
     public static final int PASSWORD_MIN_LENGTH = 4;
@@ -17,19 +23,5 @@ public class ManagedUserVM extends UserDTO {
 
     public ManagedUserVM() {
         // Empty constructor needed for Jackson.
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String toString() {
-        return "ManagedUserVM{" +
-            "} " + super.toString();
     }
 }

@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.dhomoni.uaa.domain.Doctor;
 import com.dhomoni.uaa.domain.Patient;
 import com.dhomoni.uaa.domain.User;
 

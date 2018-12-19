@@ -24,6 +24,7 @@ public class UaaProperties {
     /**
      * Keystore configuration for signing and verifying JWT tokens.
      */
+    @SuppressWarnings("squid:S2068")
     public static class KeyStore {
         //name of the keystore in the classpath
         private String name = "config/tls/keystore.p12";

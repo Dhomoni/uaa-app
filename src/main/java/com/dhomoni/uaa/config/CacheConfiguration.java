@@ -26,7 +26,7 @@ import javax.annotation.PreDestroy;
 @EnableCaching
 public class CacheConfiguration {
 
-    private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
+	private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
 
     private final Environment env;
 
@@ -56,8 +56,7 @@ public class CacheConfiguration {
     @Bean
     public CacheManager cacheManager(HazelcastInstance hazelcastInstance) {
         log.debug("Starting HazelcastCacheManager");
-        CacheManager cacheManager = new com.hazelcast.spring.cache.HazelcastCacheManager(hazelcastInstance);
-        return cacheManager;
+        return new com.hazelcast.spring.cache.HazelcastCacheManager(hazelcastInstance);
     }
 
     @Bean
@@ -83,12 +82,13 @@ public class CacheConfiguration {
                 log.debug("Application is running with the \"dev\" profile, Hazelcast " +
                           "cluster will only work with localhost instances");
 
-                System.setProperty("hazelcast.local.localAddress", "127.0.0.1");
+                String localhost = env.getProperty("hazelcast.local.localAddress");
+                System.setProperty("hazelcast.local.localAddress", localhost);
                 config.getNetworkConfig().setPort(serverProperties.getPort() + 5701);
                 config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
                 for (ServiceInstance instance : discoveryClient.getInstances(serviceId)) {
-                    String clusterMember = "127.0.0.1:" + (instance.getPort() + 5701);
-                    log.debug("Adding Hazelcast (dev) cluster member " + clusterMember);
+                    String clusterMember = localhost + ":" + (instance.getPort() + 5701);
+                    log.debug("Adding Hazelcast (dev) cluster member {}", clusterMember);
                     config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(clusterMember);
                 }
             } else { // Production configuration, one host per instance all using port 5701
@@ -96,7 +96,7 @@ public class CacheConfiguration {
                 config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
                 for (ServiceInstance instance : discoveryClient.getInstances(serviceId)) {
                     String clusterMember = instance.getHost() + ":5701";
-                    log.debug("Adding Hazelcast (prod) cluster member " + clusterMember);
+                    log.debug("Adding Hazelcast (prod) cluster member {}", clusterMember);
                     config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(clusterMember);
                 }
             }

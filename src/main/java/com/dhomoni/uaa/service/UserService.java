@@ -32,8 +32,11 @@ import com.dhomoni.uaa.repository.search.UserSearchRepository;
 import com.dhomoni.uaa.security.AuthoritiesConstants;
 import com.dhomoni.uaa.security.SecurityUtils;
 import com.dhomoni.uaa.service.dto.UserDTO;
+import com.dhomoni.uaa.service.dto.DoctorDTO;
 import com.dhomoni.uaa.service.util.RandomUtil;
+import com.dhomoni.uaa.web.rest.errors.DoctorDataNotFoundException;
 import com.dhomoni.uaa.web.rest.errors.EmailAlreadyUsedException;
+import com.dhomoni.uaa.web.rest.errors.InvalidLicenceNumberException;
 import com.dhomoni.uaa.web.rest.errors.InvalidPasswordException;
 import com.dhomoni.uaa.web.rest.errors.LicenceNumberAlreadyUsedException;
 import com.dhomoni.uaa.web.rest.errors.LoginAlreadyUsedException;
@@ -44,6 +47,8 @@ import com.dhomoni.uaa.web.rest.errors.LoginAlreadyUsedException;
 @Service
 @Transactional
 public class UserService {
+
+	private static final String CHANGED_INFORMATION_FOR_USER = "Changed Information for User: {}";
 
 	private final Logger log = LoggerFactory.getLogger(UserService.class);
 
@@ -120,9 +125,16 @@ public class UserService {
                 throw new EmailAlreadyUsedException();
             }
         });
-        if(userDTO.getAuthorities().contains(AuthoritiesConstants.DOCTOR)) {
-        	doctorRepository.findOneByLicenceNumber(userDTO.getLicenceNumber()).ifPresent(existingDoctor -> {
-        		throw new LicenceNumberAlreadyUsedException();
+        if(userDTO.hasDoctorAuthority()) {
+        	DoctorDTO doctorDTO = userDTO.getDoctorDTO().orElseThrow(DoctorDataNotFoundException::new);
+        	if(!doctorDTO.isLiceceNumberValid()) {
+        		throw new InvalidLicenceNumberException();
+        	}
+        	doctorRepository.findOneByLicenceNumber(doctorDTO.getLicenceNumber()).ifPresent(existingDoctor -> {
+                boolean removed = removeNonActivatedDoctor(existingDoctor);
+                if (!removed) {
+                	throw new LicenceNumberAlreadyUsedException();
+                }
             });
         }
         User newUser = new User();
@@ -152,34 +164,50 @@ public class UserService {
         log.debug("Created Information for User: {}", newUser);
         if(userDTO.getAuthorities().contains(AuthoritiesConstants.DOCTOR)) {
         	createDoctor(userDTO, newUser);
-        } else {
+        } else if(userDTO.getAuthorities().contains(AuthoritiesConstants.USER)) {
         	createPatient(userDTO, newUser);
         }
         return newUser;
     }
 
-	private void createDoctor(UserDTO doctorDTO, User newUser) {
+	private void createDoctor(UserDTO userDTO, User newUser) {
 		// Create and save the Doctor entity
 		Doctor newDoctor = new Doctor();
-		newDoctor.setPhone(doctorDTO.getPhone());
-		newDoctor.setLicenceNumber(doctorDTO.getLicenceNumber());
-		newDoctor.setNationalId(doctorDTO.getNationalId());
-		newDoctor.setPassportNo(doctorDTO.getPassportNo());
-		newDoctor.setDesignation(doctorDTO.getDesignation());
-		newDoctor.setDescription(doctorDTO.getDescription());
-		newDoctor.setImage(doctorDTO.getImage());
-		newDoctor.setImageContentType(doctorDTO.getImageContentType());
+		newDoctor.setPhone(userDTO.getPhone());
+		newDoctor.setImage(userDTO.getImage());
+		newDoctor.setImageContentType(userDTO.getImageContentType());
+		newDoctor.setAddress(userDTO.getAddress());
+		newDoctor.setLocation(userDTO.getLocation());
+		userDTO.getDoctorDTO().ifPresent(doctorDTO -> {
+			newDoctor.setType(doctorDTO.getType());
+			newDoctor.setDepartment(doctorDTO.getDepartment());
+			newDoctor.setLicenceNumber(doctorDTO.getLicenceNumber());
+			newDoctor.setNationalId(doctorDTO.getNationalId());
+			newDoctor.setPassportNo(doctorDTO.getPassportNo());
+			newDoctor.setDesignation(doctorDTO.getDesignation());
+			newDoctor.setDescription(doctorDTO.getDescription());
+			newDoctor.setDegrees(doctorDTO.getDegrees());
+		});
 		newDoctor.setUser(newUser);
 		doctorRepository.save(newDoctor);
 		log.debug("Created Information for Doctor: {}", newDoctor);
 	}
 
-	private void createPatient(UserDTO patientDTO, User newUser) {
+	private void createPatient(UserDTO userDTO, User newUser) {
 		// Create and save the Patient entity
 		Patient newPatient = new Patient();
-		newPatient.setPhone(patientDTO.getPhone());
-		newPatient.setImage(patientDTO.getImage());
-		newPatient.setImageContentType(patientDTO.getImageContentType());
+		newPatient.setImage(userDTO.getImage());
+		newPatient.setImageContentType(userDTO.getImageContentType());
+		newPatient.setAddress(userDTO.getAddress());
+		newPatient.setLocation(userDTO.getLocation());
+		newPatient.setPhone(userDTO.getPhone());
+		userDTO.getPatientDTO().ifPresent(patientDTO -> {
+			newPatient.setBloodGroup(patientDTO.getBloodGroup());
+			newPatient.setSex(patientDTO.getSex());
+			newPatient.setBirthTimestamp(patientDTO.getBirthTimestamp());
+			newPatient.setWeightInKG(patientDTO.getWeightInKG());
+			newPatient.setHeightInInch(patientDTO.getHeightInInch());
+		});
 		newPatient.setUser(newUser);
 		patientRepository.save(newPatient);
 		log.debug("Created Information for Patient: {}", newPatient);
@@ -195,6 +223,18 @@ public class UserService {
 		return true;
 	}
 
+	private boolean removeNonActivatedDoctor(Doctor existingDoctor) {
+		if (existingDoctor.getUser().getActivated()) {
+			return false;
+		}
+		doctorRepository.delete(existingDoctor);
+		userRepository.delete(existingDoctor.getUser());
+		doctorRepository.flush();
+		userRepository.flush();
+		this.clearUserCaches(existingDoctor.getUser());
+		return true;
+	}
+	
 	public User createUser(UserDTO userDTO) {
 		User user = new User();
 		user.setLogin(userDTO.getLogin().toLowerCase());
@@ -223,28 +263,75 @@ public class UserService {
 		log.debug("Created Information for User: {}", user);
 		return user;
 	}
-
+	
 	/**
-	 * Update basic information (first name, last name, email, language) for the
-	 * current user.
-	 *
-	 * @param firstName first name of user
-	 * @param lastName  last name of user
-	 * @param email     email id of user
-	 * @param langKey   language key
-	 * @param imageUrl  image URL of user
+	 * Update all information for the current user.
+	 * @param userDTO user to update
+	 * @return updated user
 	 */
-	public void updateUser(String firstName, String lastName, String email, String langKey, String imageUrl) {
-		SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByLogin).ifPresent(user -> {
-			user.setFirstName(firstName);
-			user.setLastName(lastName);
-			user.setEmail(email.toLowerCase());
-			user.setLangKey(langKey);
-			user.setImageUrl(imageUrl);
+	@Transactional
+	public Optional<UserDTO> updateCurrentUser(UserDTO userDTO) {	
+		return SecurityUtils.getCurrentUserLogin()
+				.flatMap(userRepository::findOneWithAuthoritiesByLogin).map(user -> {
+			this.clearUserCaches(user);
+			user.setFirstName(userDTO.getFirstName());
+			user.setLastName(userDTO.getLastName());
+			user.setEmail(userDTO.getEmail().toLowerCase());
+			user.setImageUrl(userDTO.getImageUrl());
+			user.setLangKey(userDTO.getLangKey());
 			userSearchRepository.save(user);
 			this.clearUserCaches(user);
-			log.debug("Changed Information for User: {}", user);
+			log.debug(CHANGED_INFORMATION_FOR_USER, user);
+			if(user.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.DOCTOR.equals(a.getName()))) {
+				updateCurrentDoctor(userDTO, user);
+			} else if(user.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.USER.equals(a.getName()))) {
+				updateCurrentPatient(userDTO, user);
+			}
+			return user;
+		}).map(UserDTO::new);
+	}
+	
+	private void updateCurrentDoctor(UserDTO userDTO, User user) {
+		// Update doctor
+		Doctor doctor = doctorRepository.findOneByUser(user).orElseGet(Doctor::new);
+		doctor.setPhone(userDTO.getPhone());
+		doctor.setImage(userDTO.getImage());
+		doctor.setImageContentType(userDTO.getImageContentType());
+		doctor.setAddress(userDTO.getAddress());
+		doctor.setLocation(userDTO.getLocation());
+		userDTO.getDoctorDTO().ifPresent(doctorDTO -> {
+			doctor.setType(doctorDTO.getType());
+			doctor.setDepartment(doctorDTO.getDepartment());
+			doctor.setLicenceNumber(doctorDTO.getLicenceNumber());
+			doctor.setNationalId(doctorDTO.getNationalId());
+			doctor.setPassportNo(doctorDTO.getPassportNo());
+			doctor.setDesignation(doctorDTO.getDesignation());
+			doctor.setDescription(doctorDTO.getDescription());
+			doctor.setDegrees(doctorDTO.getDegrees());
 		});
+		doctor.setUser(user);
+		doctorRepository.save(doctor);
+		log.debug("Created Information for Doctor: {}", doctor);
+	}
+
+	private void updateCurrentPatient(UserDTO userDTO, User user) {
+		// Update patient
+		Patient patient = patientRepository.findOneByUser(user).orElseGet(Patient::new);
+		patient.setPhone(userDTO.getPhone());
+		patient.setImage(userDTO.getImage());
+		patient.setImageContentType(userDTO.getImageContentType());
+		patient.setAddress(userDTO.getAddress());
+		patient.setLocation(userDTO.getLocation());
+		userDTO.getPatientDTO().ifPresent(patientDTO -> {
+			patient.setBloodGroup(patientDTO.getBloodGroup());
+			patient.setSex(patientDTO.getSex());
+			patient.setBirthTimestamp(patientDTO.getBirthTimestamp());
+			patient.setWeightInKG(patientDTO.getWeightInKG());
+			patient.setHeightInInch(patientDTO.getHeightInInch());
+		});
+		patient.setUser(user);
+		patientRepository.save(patient);
+		log.debug("Created Information for Patient: {}", patient);
 	}
 
 	/**
@@ -254,7 +341,7 @@ public class UserService {
 	 * @return updated user
 	 */
 	public Optional<UserDTO> updateUser(UserDTO userDTO) {
-		return Optional.of(userRepository.findById(userDTO.getId())).filter(Optional::isPresent).map(Optional::get)
+		return userRepository.findById(userDTO.getId())
 				.map(user -> {
 					this.clearUserCaches(user);
 					user.setLogin(userDTO.getLogin().toLowerCase());
@@ -270,7 +357,7 @@ public class UserService {
 							.map(Optional::get).forEach(managedAuthorities::add);
 					userSearchRepository.save(user);
 					this.clearUserCaches(user);
-					log.debug("Changed Information for User: {}", user);
+					log.debug(CHANGED_INFORMATION_FOR_USER, user);
 					return user;
 				}).map(UserDTO::new);
 	}
@@ -319,10 +406,10 @@ public class UserService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Optional<Doctor> getDoctorWithAuthorities() {
+	public Optional<Doctor> getDoctorWithAuthoritiesAndDegrees() {
 		return SecurityUtils.getCurrentUserLogin()
 				.flatMap(userRepository::findOneWithAuthoritiesByLogin)
-				.flatMap(user -> doctorRepository.findOneByUser(user).map(doctor -> {
+				.flatMap(user -> doctorRepository.findOneWithDegreesByUser(user).map(doctor -> {
 					doctor.setUser(user);
 					return doctor;
 				}));

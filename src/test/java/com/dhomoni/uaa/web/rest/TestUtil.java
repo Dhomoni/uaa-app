@@ -1,8 +1,13 @@
 package com.dhomoni.uaa.web.rest;
 
+import com.bedatadriven.jackson.datatype.jts.JtsModule;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
@@ -42,7 +47,12 @@ public class TestUtil {
 
         JavaTimeModule module = new JavaTimeModule();
         mapper.registerModule(module);
-
+		GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+        JtsModule jtsModule = new JtsModule(gf);
+        mapper.registerModule(jtsModule);
+        Jdk8Module jdk8Module = new Jdk8Module();
+        mapper.registerModule(jdk8Module);
+        String t = mapper.writeValueAsString(object);
         return mapper.writeValueAsBytes(object);
     }
 

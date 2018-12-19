@@ -1,47 +1,74 @@
 package com.dhomoni.uaa.domain;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.dhomoni.uaa.config.Constants;
+import com.vividsolutions.jts.geom.Point;
+
+import lombok.Data;
+
 @Entity
 @Table(name = "doctor")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Data
 public class Doctor implements Serializable {
     
 	private static final long serialVersionUID = 1L;
-
+	
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column( columnDefinition = "uuid")
+    private UUID id;
     
-    @Pattern(regexp = "^(?:[0-9] ?){6,14}[0-9]$")
+    @Pattern(regexp = Constants.PHONE_REGEX)
     private String phone;
+        
+    private Integer type;
     
+    private Integer department;
+    
+    @Column(name = "licence_number")
     private String licenceNumber;
 
+    @Column(name = "national_id")
     private String nationalId;
     
+    @Column(name = "passport_no")
     private String passportNo;
     
+    @Column(name = "designation")
     private String designation;
 
+    @Column(name = "description")
     private String description;
+    
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "doctor_id")
+    private Set<Degree> degrees;
+    
+    @Column(name = "address")
+    private String address;
+    
+    @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point,4326)")
+    private Point location;
 
     @Lob
     @Column(name = "image")
@@ -52,84 +79,4 @@ public class Doctor implements Serializable {
 
     @OneToOne
     private User user;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public byte[] getImage() {
-		return image;
-	}
-
-	public void setImage(byte[] image) {
-		this.image = image;
-	}
-
-	public String getImageContentType() {
-		return imageContentType;
-	}
-
-	public void setImageContentType(String imageContentType) {
-		this.imageContentType = imageContentType;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public String getLicenceNumber() {
-		return licenceNumber;
-	}
-
-	public void setLicenceNumber(String licenceNumber) {
-		this.licenceNumber = licenceNumber;
-	}
-
-	public String getNationalId() {
-		return nationalId;
-	}
-
-	public void setNationalId(String nationalId) {
-		this.nationalId = nationalId;
-	}
-
-	public String getPassportNo() {
-		return passportNo;
-	}
-
-	public void setPassportNo(String passportNo) {
-		this.passportNo = passportNo;
-	}
-
-	public String getDesignation() {
-		return designation;
-	}
-
-	public void setDesignation(String designation) {
-		this.designation = designation;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
 }

@@ -60,7 +60,8 @@ spring:
         console:
             enabled: false
     jpa:
-        database-platform: io.github.jhipster.domain.util.FixedH2Dialect
+#        database-platform: io.github.jhipster.domain.util.FixedH2Dialect
+        database-platform: org.hibernate.spatial.dialect.h2geodb.GeoDBDialect
         database: H2
         show-sql: true
         properties:
@@ -102,6 +103,10 @@ spring:
         locator:
             discovery:
                 enabled: true
+
+hazelcast:
+  local:
+    localAddress: 127.0.0.1
 
 server:
     port: 9999
