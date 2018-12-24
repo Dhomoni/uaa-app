@@ -1,7 +1,7 @@
 package com.dhomoni.uaa.domain;
 
 import com.dhomoni.uaa.config.Constants;
-
+import com.dhomoni.uaa.security.AuthoritiesConstants;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
@@ -96,6 +96,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
 
+    public boolean isDoctor() {
+    	return authorities != null && authorities.stream().anyMatch(a -> AuthoritiesConstants.DOCTOR.equals(a.getName()));
+    }
+
+    public boolean isPatient() {
+    	return authorities != null && authorities.stream().anyMatch(a -> AuthoritiesConstants.PATIENT.equals(a.getName()));
+    }
+    
     public Long getId() {
         return id;
     }

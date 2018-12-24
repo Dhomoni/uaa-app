@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -187,9 +189,11 @@ public class AccountResourceIntTest {
         user.setImageUrl("http://placehold.it/50x50");
         user.setLangKey("en");
         user.setActivated(true);
-        Authority auth = new Authority();
-        auth.setName(AuthoritiesConstants.DOCTOR);
-        user.setAuthorities(Collections.singleton(auth));
+        Authority doctorAuth = new Authority();
+        doctorAuth.setName(AuthoritiesConstants.DOCTOR);
+        Authority userAuth = new Authority();
+        userAuth.setName(AuthoritiesConstants.USER);
+        user.setAuthorities(Stream.of(doctorAuth, userAuth).collect(Collectors.toSet()));
         Doctor doctor = new Doctor();
         doctor.setPhone("8888123234355");
         doctor.setType(1);
@@ -224,7 +228,8 @@ public class AccountResourceIntTest {
             .andExpect(jsonPath("$.email").value(user.getEmail()))
             .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
             .andExpect(jsonPath("$.langKey").value(user.getLangKey()))
-            .andExpect(jsonPath("$.authorities").value(AuthoritiesConstants.DOCTOR))
+            .andExpect(jsonPath("$.authorities[0]").value(AuthoritiesConstants.USER))
+            .andExpect(jsonPath("$.authorities[1]").value(AuthoritiesConstants.DOCTOR))
             .andExpect(jsonPath("$.phone").value(doctor.getPhone()))
             .andExpect(jsonPath("$.address").value(doctor.getAddress()))
             .andExpect(jsonPath("$.image").exists())
@@ -245,12 +250,8 @@ public class AccountResourceIntTest {
     
     @Test
     @Transactional
-    @WithMockUser(username="existing-patient-account", password="password", roles={"USER"})
+    @WithMockUser(username = "existing-patient-account", password = "password", roles = {"PATIENT", "USER"})
     public void testGetExistingPatientAccount() throws Exception {
-        Set<Authority> authorities = new HashSet<>();
-        Authority authority = new Authority();
-        authority.setName(AuthoritiesConstants.USER);
-        authorities.add(authority);
         User user = new User();
         user.setLogin("existing-patient-account");
         user.setFirstName("john");
@@ -258,7 +259,11 @@ public class AccountResourceIntTest {
         user.setEmail("existing-patient-account@jhipster.com");
         user.setImageUrl("http://placehold.it/50x50");
         user.setLangKey("en");
-        user.setAuthorities(authorities);
+        Authority patientAuth = new Authority();
+        patientAuth.setName(AuthoritiesConstants.PATIENT);
+        Authority userAuth = new Authority();
+        userAuth.setName(AuthoritiesConstants.USER);
+        user.setAuthorities(Stream.of(patientAuth, userAuth).collect(Collectors.toSet()));
         Patient patient = new Patient();
         patient.setPhone("8888123234355");
         String timestamp = "2016-02-16 11:00:02";
@@ -287,7 +292,8 @@ public class AccountResourceIntTest {
             .andExpect(jsonPath("$.email").value(user.getEmail()))
             .andExpect(jsonPath("$.imageUrl").value(user.getImageUrl()))
             .andExpect(jsonPath("$.langKey").value(user.getLangKey()))
-            .andExpect(jsonPath("$.authorities").value(AuthoritiesConstants.USER))
+            .andExpect(jsonPath("$.authorities[0]").value(AuthoritiesConstants.PATIENT))
+            .andExpect(jsonPath("$.authorities[1]").value(AuthoritiesConstants.USER))
             .andExpect(jsonPath("$.phone").value(patient.getPhone()))
             .andExpect(jsonPath("$.address").value(patient.getAddress()))
             .andExpect(jsonPath("$.image").exists())
@@ -945,9 +951,11 @@ public class AccountResourceIntTest {
         user.setEmail("save-doctor-account@example.com");
         user.setPassword(RandomStringUtils.random(60));
         user.setActivated(true);
-        Authority auth = new Authority();
-        auth.setName(AuthoritiesConstants.DOCTOR);
-        user.setAuthorities(Collections.singleton(auth));
+        Authority doctorAuth = new Authority();
+        doctorAuth.setName(AuthoritiesConstants.DOCTOR);
+        Authority userAuth = new Authority();
+        userAuth.setName(AuthoritiesConstants.USER);
+        user.setAuthorities(Stream.of(doctorAuth, userAuth).collect(Collectors.toSet()));
 
         User newUser = userRepository.saveAndFlush(user);
     	
@@ -963,7 +971,7 @@ public class AccountResourceIntTest {
         doctor.setPhone("11112222345");
         doctor.setAddress("Dhanmondi");
         Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
-        doctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
+//        doctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         doctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
         doctorDTO.setType(1);
@@ -1022,9 +1030,11 @@ public class AccountResourceIntTest {
         user.setEmail("save-patient-account@example.com");
         user.setPassword(RandomStringUtils.random(60));
         user.setActivated(true);
-        Authority auth = new Authority();
-        auth.setName(AuthoritiesConstants.USER);
-        user.setAuthorities(Collections.singleton(auth));
+        Authority patientAuth = new Authority();
+        patientAuth.setName(AuthoritiesConstants.PATIENT);
+        Authority userAuth = new Authority();
+        userAuth.setName(AuthoritiesConstants.USER);
+        user.setAuthorities(Stream.of(patientAuth, userAuth).collect(Collectors.toSet()));
 
         User newUser = userRepository.saveAndFlush(user);
     	

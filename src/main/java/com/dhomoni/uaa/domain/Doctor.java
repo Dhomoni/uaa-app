@@ -40,9 +40,11 @@ public class Doctor implements Serializable {
     
     @Pattern(regexp = Constants.PHONE_REGEX)
     private String phone;
-        
+
+    @Column(name = "type")
     private Integer type;
     
+    @Column(name = "department")
     private Integer department;
     
     @Column(name = "licence_number")

@@ -131,7 +131,7 @@ public class UserService {
         		throw new InvalidLicenceNumberException();
         	}
         	doctorRepository.findOneByLicenceNumber(doctorDTO.getLicenceNumber()).ifPresent(existingDoctor -> {
-                boolean removed = removeNonActivatedDoctor(existingDoctor);
+                boolean removed = removeNonActivatedUser(existingDoctor.getUser());
                 if (!removed) {
                 	throw new LicenceNumberAlreadyUsedException();
                 }
@@ -152,6 +152,7 @@ public class UserService {
         // new user gets registration key
         newUser.setActivationKey(RandomUtil.generateActivationKey());
         Set<Authority> authorities = new HashSet<>();
+        // admin user can not be created through registration
         userDTO.getAuthorities().stream()
         	.map(auth -> AuthoritiesConstants.ADMIN.equals(auth)
         				? authorityRepository.findById(AuthoritiesConstants.USER) 
@@ -162,9 +163,9 @@ public class UserService {
         userSearchRepository.save(newUser);
         this.clearUserCaches(newUser);
         log.debug("Created Information for User: {}", newUser);
-        if(userDTO.getAuthorities().contains(AuthoritiesConstants.DOCTOR)) {
+        if(userDTO.hasDoctorAuthority()) {
         	createDoctor(userDTO, newUser);
-        } else if(userDTO.getAuthorities().contains(AuthoritiesConstants.USER)) {
+        } else if(userDTO.hasPatientAuthority()) {
         	createPatient(userDTO, newUser);
         }
         return newUser;
@@ -223,17 +224,17 @@ public class UserService {
 		return true;
 	}
 
-	private boolean removeNonActivatedDoctor(Doctor existingDoctor) {
-		if (existingDoctor.getUser().getActivated()) {
-			return false;
-		}
-		doctorRepository.delete(existingDoctor);
-		userRepository.delete(existingDoctor.getUser());
-		doctorRepository.flush();
-		userRepository.flush();
-		this.clearUserCaches(existingDoctor.getUser());
-		return true;
-	}
+//	private boolean removeNonActivatedDoctor(Doctor existingDoctor) {
+//		if (existingDoctor.getUser().getActivated()) {
+//			return false;
+//		}
+//		doctorRepository.delete(existingDoctor);
+//		userRepository.delete(existingDoctor.getUser());
+//		doctorRepository.flush();
+//		userRepository.flush();
+//		this.clearUserCaches(existingDoctor.getUser());
+//		return true;
+//	}
 	
 	public User createUser(UserDTO userDTO) {
 		User user = new User();
@@ -282,9 +283,9 @@ public class UserService {
 			userSearchRepository.save(user);
 			this.clearUserCaches(user);
 			log.debug(CHANGED_INFORMATION_FOR_USER, user);
-			if(user.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.DOCTOR.equals(a.getName()))) {
+			if(user.isDoctor()) {
 				updateCurrentDoctor(userDTO, user);
-			} else if(user.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.USER.equals(a.getName()))) {
+			} else if(user.isPatient()) {
 				updateCurrentPatient(userDTO, user);
 			}
 			return user;

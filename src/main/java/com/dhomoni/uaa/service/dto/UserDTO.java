@@ -136,6 +136,11 @@ public class UserDTO {
     	return authorities!=null 
     			&& authorities.contains(AuthoritiesConstants.DOCTOR);
     }
+
+    public boolean hasPatientAuthority() {
+    	return authorities!=null 
+    			&& authorities.contains(AuthoritiesConstants.PATIENT);
+    }
     
 	public Optional<DoctorDTO> getDoctorDTO() {
 		return Optional.ofNullable(this.doctorDTO);

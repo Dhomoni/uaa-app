@@ -122,9 +122,9 @@ public class AccountResource {
 		if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.DOCTOR)) {
 			return userService.getDoctorWithAuthoritiesAndDegrees().map(UserDTO::new)
 					.orElseThrow(() -> new InternalServerErrorException("Doctor could not be found"));
-		} else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.USER)) {
+		} else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.PATIENT)) {
 			return userService.getPatientWithAuthorities().map(UserDTO::new)
-					.orElseThrow(() -> new InternalServerErrorException(USER_COULD_NOT_BE_FOUND));
+					.orElseThrow(() -> new InternalServerErrorException("Patient could not be found"));
 		}
 		return userService.getUserWithAuthorities().map(UserDTO::new)
 				.orElseThrow(() -> new InternalServerErrorException(USER_COULD_NOT_BE_FOUND));
