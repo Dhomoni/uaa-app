@@ -1,4 +1,13 @@
 # User Authentication and Authorization App
+[![Build Status][travis-image]][travis-url]
+[![Sonar Status][sonar-image]][sonar-url]
+
+[travis-image]: https://travis-ci.com/Dhomoni/uaa-app.svg?branch=master
+[travis-url]: https://travis-ci.com/Dhomoni/uaa-app
+
+[sonar-image]: https://sonarcloud.io/api/project_badges/measure?project=com.dhomoni.uaa%3Auaa&metric=alert_status
+[sonar-url]: https://sonarcloud.io/dashboard?id=com.dhomoni.uaa%3Auaa
+
 This application was generated using JHipster 5.6.1, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v5.6.1](https://www.jhipster.tech/documentation-archive/v5.6.1).
 
 This is a "uaa" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
