@@ -129,7 +129,7 @@ export const AUTHORITIES = {
     	<rollback>
         	<sql dbms="h2">DROP ALIAS InitGeoDB</sql>
     	</rollback>
-	</changeSet>
+    </changeSet>
 
 10. make the table name in capital letters as the following example in liquibase chengelog
     <createTable tableName="DOCTOR">
