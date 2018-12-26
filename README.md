@@ -157,7 +157,7 @@ export const AUTHORITIES = {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         JavaTimeModule module = new JavaTimeModule();
         mapper.registerModule(module);
-		GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+        GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
         JtsModule jtsModule = new JtsModule(gf);
         mapper.registerModule(jtsModule);
         Jdk8Module jdk8Module = new Jdk8Module();
