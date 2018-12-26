@@ -53,26 +53,26 @@ export const AUTHORITIES = {
         console:
             enabled: true
 
-### How to add spatial capability in the jhipster project:
+### How to add spatial capability (postgresql + postgis) in the jhipster project:
 ```
 1. add repository in pom.xml
     <repository>
-		<id>boundless</id>
-		<url>https://repo.boundlessgeo.com/main</url>
-	</repository>
+        <id>boundless</id>
+        <url>https://repo.boundlessgeo.com/main</url>
+    </repository>
 
 2. add properties in pom.xml
     <properties>
         <hibernate-spatial.version>5.2.17.Final</hibernate-spatial.version>
-	    <liquibase-spatial.version>1.2.1</liquibase-spatial.version>
-	    <geodb.version>0.9</geodb.version>
-	    <jackson-datatype-jts.version>2.4</jackson-datatype-jts.version>
+        <liquibase-spatial.version>1.2.1</liquibase-spatial.version>
+        <geodb.version>0.9</geodb.version>
+        <jackson-datatype-jts.version>2.4</jackson-datatype-jts.version>
     </properties>
 
 3. add hibernate-spatial, liquibase-spatial, geodb and jackson-datatype-jts dependencies to pom.xml
     <dependency>
-	    <groupId>org.hibernate</groupId>
-		<artifactId>hibernate-spatial</artifactId>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-spatial</artifactId>
     </dependency>
     <dependency>
         <groupId>com.github.lonnyj</groupId>
@@ -80,16 +80,16 @@ export const AUTHORITIES = {
         <version>${liquibase-spatial.version}</version>
     </dependency>
     <dependency>
-		<groupId>org.opengeo</groupId>
-		<artifactId>geodb</artifactId>
-		<version>${geodb.version}</version>
-		<scope>test</scope>
-	</dependency>
-	<dependency>
-		<groupId>com.bedatadriven</groupId>
-		<artifactId>jackson-datatype-jts</artifactId>
-		<version>${jackson-datatype-jts.version}</version>
-	</dependency>
+        <groupId>org.opengeo</groupId>
+        <artifactId>geodb</artifactId>
+        <version>${geodb.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.bedatadriven</groupId>
+        <artifactId>jackson-datatype-jts</artifactId>
+        <version>${jackson-datatype-jts.version}</version>
+    </dependency>
 
 4. add geodb dependency under dev profile
     <dependency>
@@ -109,6 +109,38 @@ export const AUTHORITIES = {
         <artifactId>liquibase-spatial</artifactId>
         <version>${liquibase-spatial.version}</version>
     </dependency>
+
+6. use GeoDBDialect in liquibase-maven-plugin
+    <referenceUrl>hibernate:spring:com.dhomoni.uaa.domain?dialect=org.hibernate.spatial.dialect.h2geodb.GeoDBDialect&amp;hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&amp;hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    </referenceUrl>
+
+7. change dialect in application-dev.yml
+    jpa:
+        database-platform: org.hibernate.spatial.dialect.h2geodb.GeoDBDialect
+
+8. change dialect in application-prod.yml
+    jpa:
+        database-platform: org.hibernate.spatial.dialect.postgis.PostgisDialect
+
+9. add the foolowing segment in 00000000000000_initial_schema.xml at the top
+    <changeSet id="spatial_db" author="pervez" dbms="h2">
+    	<sql dbms="h2">CREATE ALIAS InitGeoDB for "geodb.GeoDB.InitGeoDB"</sql>
+    	<sql dbms="h2">CALL InitGeoDB()</sql>
+    	<rollback>
+        	<sql dbms="h2">DROP ALIAS InitGeoDB</sql>
+    	</rollback>
+	</changeSet>
+
+10. make the table name in capital letters as the following example in liquibase chengelog
+    <createTable tableName="DOCTOR">
+        <column name="GEOM" type="GEOMETRY(Point, 4326)"/>
+    </createTable>  
+
+11. add the following segment in the entity
+    import com.vividsolutions.jts.geom.Point;
+
+    @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point,4326)")
+    private Point location;
 
 
 https://stackoverflow.com/questions/50122390/integration-of-postgis-with-jhipster
