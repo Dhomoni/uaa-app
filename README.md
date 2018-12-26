@@ -20,8 +20,7 @@ This application is configured for Service Discovery and Configuration with . On
 ### How to add new roles in microservice architectures of Jhipster:
 All Roles: ADMIN, PATIENT, DOCTOR, USER(common)
 
-UAA server:
------------
+#### UAA server:
 1. Add user to src/main/resources/config/liquibase/users.csv
 5;doctor;$2a$10$VEjxo0jq2YG9Rbk2HmX9S.k1uZBGYUHdUcid3g/vfiEl7lwWgOH/K;Doctor;Doctor;doctor@localhost;;true;en;system;system
 
@@ -36,8 +35,7 @@ ROLE_DOCTOR
 
 6. Login with username: doctor and password: user
 
-Gateway server:
----------------
+#### Gateway server:
 1. Add role to src/main/webapp/app/config/constants.ts
 export const AUTHORITIES = {
   ADMIN: 'ROLE_ADMIN',
@@ -50,12 +48,12 @@ export const AUTHORITIES = {
 3. Add role to src/main/java/com/dhomoni/gateway/security/AuthoritiesConstants.java
     public static final String DOCTOR = "ROLE_DOCTOR";
 
-# How to enable H2 console in dev profile:
+### How to enable H2 console in dev profile:
     h2:
         console:
             enabled: true
 
-# How to add spatial capability in the project:
+### How to add spatial capability in the project:
 ```
 https://stackoverflow.com/questions/50122390/integration-of-postgis-with-jhipster
 https://www.baeldung.com/hibernate-spatial
@@ -72,7 +70,7 @@ https://www.baeldung.com/hibernate-spatial
 8. remove statements that drop spatial tables in the generated change logs
 ```
 
-# Notes on development environment:
+### Notes on development environment:
 ```
 01. Install Java
 
