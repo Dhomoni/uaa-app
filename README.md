@@ -17,7 +17,7 @@ This application is configured for Service Discovery and Configuration with . On
 
 ## Development
 
-# How to add new roles in microservice architectures of Jhipster:
+### How to add new roles in microservice architectures of Jhipster:
 All Roles: ADMIN, PATIENT, DOCTOR, USER(common)
 
 UAA server:
