@@ -141,21 +141,6 @@ export const AUTHORITIES = {
 
     @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point,4326)")
     private Point location;
-
-
-https://stackoverflow.com/questions/50122390/integration-of-postgis-with-jhipster
-https://www.baeldung.com/hibernate-spatial
-
-1. we added hibernate-spatial and liquibase-spatial to pom.xml
-2. Add 'spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect' in yml file
-3. then create the jdl Entities with String fields, 
-4. import this with "jhipster import-jdl database.jdl" 
-5. then change the entities to  
-    @Column(name = "geometry", columnDefinition="Geometry") 
-    private Geometry geometry
-6. mvnw compile liquibase:diff
-7. add reference to the generated change logs in master.xml
-8. remove statements that drop spatial tables in the generated change logs
 ```
 
 ### Notes on development environment:
