@@ -17,12 +17,136 @@ This application is configured for Service Discovery and Configuration with . On
 
 ## Development
 
-To start your application in the dev profile, simply run:
+# How to add new roles in microservice architectures of Jhipster:
+All Roles: ADMIN, PATIENT, DOCTOR, USER(common)
 
-    
+UAA server:
+-----------
+1. Add user to src/main/resources/config/liquibase/users.csv
+5;doctor;$2a$10$VEjxo0jq2YG9Rbk2HmX9S.k1uZBGYUHdUcid3g/vfiEl7lwWgOH/K;Doctor;Doctor;doctor@localhost;;true;en;system;system
 
+2. Add role to src/main/resources/config/liquibase/authorities.csv
+ROLE_DOCTOR
 
-For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
+3. Add entry to src/main/resources/config/liquibase/users_authorities.csv
+5;ROLE_DOCTOR
+
+5. Add role to src/main/java/com/dhomoni/gateway/security/AuthoritiesConstants.java
+    public static final String DOCTOR = "ROLE_DOCTOR";
+
+6. Login with username: doctor and password: user
+
+Gateway server:
+---------------
+1. Add role to src/main/webapp/app/config/constants.ts
+export const AUTHORITIES = {
+  ADMIN: 'ROLE_ADMIN',
+  USER: 'ROLE_USER' ,
+  DOCTOR: 'ROLE_DOCTOR'
+};
+
+2. Add routing access in src/main/webapp/app/routes.tsx file
+
+3. Add role to src/main/java/com/dhomoni/gateway/security/AuthoritiesConstants.java
+    public static final String DOCTOR = "ROLE_DOCTOR";
+
+# How to enable H2 console in dev profile:
+    h2:
+        console:
+            enabled: true
+
+# How to add spatial capability in the project:
+```
+https://stackoverflow.com/questions/50122390/integration-of-postgis-with-jhipster
+https://www.baeldung.com/hibernate-spatial
+
+1. we added hibernate-spatial and liquibase-spatial to pom.xml
+2. Add 'spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect' in yml file
+3. then create the jdl Entities with String fields, 
+4. import this with "jhipster import-jdl database.jdl" 
+5. then change the entities to  
+    @Column(name = "geometry", columnDefinition="Geometry") 
+    private Geometry geometry
+6. mvnw compile liquibase:diff
+7. add reference to the generated change logs in master.xml
+8. remove statements that drop spatial tables in the generated change logs
+```
+
+# Notes on development environment:
+```
+01. Install Java
+
+02. Install STS
+
+03. Install npm
+
+04. Install docker
+
+05. Install docker-compose :
+		$ sudo apt install docker-compose
+
+06. Install jhipster :
+		$ npm install -g generator-jhipster
+
+07. Build postgresql-postgis docker image :
+		$ cd uaa-app/src/main/docker/postgis/
+		$ docker build -t postgresql-postgis:10.6 .   
+
+08. Pull and Deploy sonar :
+		$ docker-compose -f src/main/docker/sonar.yml up -d	
+
+09. Build and deploy uaa-app :
+		$ cd uaa-app/
+		$ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+		$ docker-compose -f src/main/docker/app.yml up
+
+11. Build and deploy gateway-app :
+		$ cd gateway-app/
+		$ npm install
+		$ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+		$ docker-compose -f src/main/docker/app.yml up
+
+12. Build and deploy diagnosys-app :
+		$ cd diagnosys-app/
+		$ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+		$ docker-compose -f src/main/docker/app.yml up
+
+13. Build and deploy search-app :
+		$ cd search-app/
+		$ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+		$ docker-compose -f src/main/docker/app.yml up
+
+14. Additional development notes :
+	To generate brand new microeservice app from jdl(example):
+		jhipster import-jdl ../app-domain-design/search-app.jdl
+	
+        To build docker image of postgres with postgis :
+		docker build -t postgresql-postgis:10.6 .
+	
+	In development you may need this for quick web debug :
+		$ npm start
+
+	To generate diff script of db and entity :
+		$ ./mvnw compile liquibase:diff
+```
+```
+Helpful commands for docker:
+docker container ps -a
+docker container stats
+docker container stop
+```
+```
+docker rm $(docker ps -a -q)
+docker rmi $(docker images -q)
+docker kill $(docker ps -q)
+```
+```
+db clean up:
+delete from jhi_user_authority where user_id = (select id from jhi_user where login = 'pervez');
+delete from jhi_user where login = 'pervez';
+delete from degree;
+```
+
 
 
 
