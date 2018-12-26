@@ -141,6 +141,29 @@ export const AUTHORITIES = {
 
     @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point, 4326)")
     private Point location;
+
+14. add following snippet in JacksonConfiguration
+
+	@Bean
+	public JtsModule jtsModule() {
+		GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+		return new JtsModule(gf);
+	}
+
+15. update following method in TestUtil
+    public static byte[] convertObjectToJsonBytes(Object object)
+            throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        JavaTimeModule module = new JavaTimeModule();
+        mapper.registerModule(module);
+		GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+        JtsModule jtsModule = new JtsModule(gf);
+        mapper.registerModule(jtsModule);
+        Jdk8Module jdk8Module = new Jdk8Module();
+        mapper.registerModule(jdk8Module);
+        return mapper.writeValueAsBytes(object);
+    }
 ```
 
 ### Notes on development environment:
