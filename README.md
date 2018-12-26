@@ -139,7 +139,7 @@ export const AUTHORITIES = {
 11. add the following segment in the entity
     import com.vividsolutions.jts.geom.Point;
 
-    @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point,4326)")
+    @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point, 4326)")
     private Point location;
 ```
 
