@@ -53,8 +53,64 @@ export const AUTHORITIES = {
         console:
             enabled: true
 
-### How to add spatial capability in the project:
+### How to add spatial capability in the jhipster project:
 ```
+1. add repository in pom.xml
+    <repository>
+		<id>boundless</id>
+		<url>https://repo.boundlessgeo.com/main</url>
+	</repository>
+
+2. add properties in pom.xml
+    <properties>
+        <hibernate-spatial.version>5.2.17.Final</hibernate-spatial.version>
+	    <liquibase-spatial.version>1.2.1</liquibase-spatial.version>
+	    <geodb.version>0.9</geodb.version>
+	    <jackson-datatype-jts.version>2.4</jackson-datatype-jts.version>
+    </properties>
+
+3. add hibernate-spatial, liquibase-spatial, geodb and jackson-datatype-jts dependencies to pom.xml
+    <dependency>
+	    <groupId>org.hibernate</groupId>
+		<artifactId>hibernate-spatial</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.github.lonnyj</groupId>
+        <artifactId>liquibase-spatial</artifactId>
+        <version>${liquibase-spatial.version}</version>
+    </dependency>
+    <dependency>
+		<groupId>org.opengeo</groupId>
+		<artifactId>geodb</artifactId>
+		<version>${geodb.version}</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>com.bedatadriven</groupId>
+		<artifactId>jackson-datatype-jts</artifactId>
+		<version>${jackson-datatype-jts.version}</version>
+	</dependency>
+
+4. add geodb dependency under dev profile
+    <dependency>
+        <groupId>org.opengeo</groupId>
+        <artifactId>geodb</artifactId>
+        <version>${geodb.version}</version>
+    </dependency>
+
+5. add dependencies under liquibase-maven-plugin
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-spatial</artifactId>
+        <version>${hibernate-spatial.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.github.lonnyj</groupId>
+        <artifactId>liquibase-spatial</artifactId>
+        <version>${liquibase-spatial.version}</version>
+    </dependency>
+
+
 https://stackoverflow.com/questions/50122390/integration-of-postgis-with-jhipster
 https://www.baeldung.com/hibernate-spatial
 
