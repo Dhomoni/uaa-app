@@ -222,6 +222,8 @@ export const AUTHORITIES = {
 
 	To generate diff script of db and entity :
 		$ ./mvnw compile liquibase:diff
+    To clear liquibase changelog checksum :
+        $ ./mvnw compile liquibase:clearCheckSums
 ```
 ```
 Helpful commands for docker:
