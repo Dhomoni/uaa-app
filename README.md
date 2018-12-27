@@ -215,7 +215,7 @@ export const AUTHORITIES = {
         jhipster import-jdl search-app.jdl --interactive
        
     To remove files with wildcard search:
-        find . -name .Weekly* -exec rm -rf {} +
+        find . -name *WeeklyVisitingHour* -exec rm -rf {} +
 
     To build docker image of postgres with postgis :
         docker build -t postgresql-postgis:10.6 .
