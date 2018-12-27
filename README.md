@@ -212,9 +212,9 @@ export const AUTHORITIES = {
 
 14. Additional development notes :
 	To generate brand new microeservice app from jdl(example):
-		jhipster import-jdl ../app-domain-design/search-app.jdl
+		jhipster import-jdl search-app.jdl
 	
-        To build docker image of postgres with postgis :
+    To build docker image of postgres with postgis :
 		docker build -t postgresql-postgis:10.6 .
 	
 	In development you may need this for quick web debug :
@@ -222,6 +222,7 @@ export const AUTHORITIES = {
 
 	To generate diff script of db and entity :
 		$ ./mvnw compile liquibase:diff
+    
     To clear liquibase changelog checksum :
         $ docker rm $(docker ps -a -q)
 ```
