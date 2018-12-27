@@ -212,7 +212,7 @@ export const AUTHORITIES = {
 
 14. Additional development notes :
     To generate brand new microeservice app from jdl(example):
-        jhipster import-jdl search-app.jdl
+        jhipster import-jdl search-app.jdl --interactive
        
     To remove files with wildcard search:
         find . -name .Weekly* -exec rm -rf {} +
