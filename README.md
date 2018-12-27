@@ -211,17 +211,17 @@ export const AUTHORITIES = {
 		$ docker-compose -f src/main/docker/app.yml up
 
 14. Additional development notes :
-	To generate brand new microeservice app from jdl(example):
-		jhipster import-jdl search-app.jdl
+    To generate brand new microeservice app from jdl(example):
+        jhipster import-jdl search-app.jdl
 	
     To build docker image of postgres with postgis :
-		docker build -t postgresql-postgis:10.6 .
+        docker build -t postgresql-postgis:10.6 .
 	
-	In development you may need this for quick web debug :
-		$ npm start
+    In development you may need this for quick web debug :
+        $ npm start
 
-	To generate diff script of db and entity :
-		$ ./mvnw compile liquibase:diff
+    To generate diff script of db and entity :
+        $ ./mvnw compile liquibase:diff
     
     To clear liquibase changelog checksum :
         $ docker rm $(docker ps -a -q)
