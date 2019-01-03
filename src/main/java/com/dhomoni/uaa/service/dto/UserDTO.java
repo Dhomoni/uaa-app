@@ -111,7 +111,7 @@ public class UserDTO {
     	this.doctorDTO.setPassportNo(doctor.getPassportNo());
     	this.doctorDTO.setDesignation(doctor.getDesignation());
     	this.doctorDTO.setType(doctor.getType());
-    	this.doctorDTO.setDepartment(doctor.getDepartment());
+    	this.doctorDTO.setMedicalDepartment(doctor.getMedicalDepartment());
     	this.doctorDTO.setDescription(doctor.getDescription());
     	this.doctorDTO.setProfessionalDegrees(doctor.getProfessionalDegrees());
     }

@@ -1,7 +1,6 @@
 package com.dhomoni.uaa.service.dto;
 
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,11 +15,11 @@ public class DoctorDTO {
     private static final int LICENCE_NUMBER_MIN_LENGTH = 4;
     private static final int LICENCE_NUMBER_MAX_LENGTH = 20;
 	
-	private UUID id;
+	private Long id;
 	
     private DoctorType type;
     
-    private Integer department;
+    private Integer medicalDepartment;
 	
     private String licenceNumber;
 

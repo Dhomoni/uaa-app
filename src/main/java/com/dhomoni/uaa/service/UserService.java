@@ -181,7 +181,7 @@ public class UserService {
 		newDoctor.setLocation(userDTO.getLocation());
 		userDTO.getDoctorDTO().ifPresent(doctorDTO -> {
 			newDoctor.setType(doctorDTO.getType());
-			newDoctor.setDepartment(doctorDTO.getDepartment());
+			newDoctor.setMedicalDepartment(doctorDTO.getMedicalDepartment());
 			newDoctor.setLicenceNumber(doctorDTO.getLicenceNumber());
 			newDoctor.setNationalId(doctorDTO.getNationalId());
 			newDoctor.setPassportNo(doctorDTO.getPassportNo());
@@ -302,7 +302,7 @@ public class UserService {
 		doctor.setLocation(userDTO.getLocation());
 		userDTO.getDoctorDTO().ifPresent(doctorDTO -> {
 			doctor.setType(doctorDTO.getType());
-			doctor.setDepartment(doctorDTO.getDepartment());
+			doctor.setMedicalDepartment(doctorDTO.getMedicalDepartment());
 			doctor.setLicenceNumber(doctorDTO.getLicenceNumber());
 			doctor.setNationalId(doctorDTO.getNationalId());
 			doctor.setPassportNo(doctorDTO.getPassportNo());
@@ -407,10 +407,10 @@ public class UserService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Optional<Doctor> getDoctorWithAuthoritiesAndDegrees() {
+	public Optional<Doctor> getDoctorWithAuthoritiesAndProfessionalDegrees() {
 		return SecurityUtils.getCurrentUserLogin()
 				.flatMap(userRepository::findOneWithAuthoritiesByLogin)
-				.flatMap(user -> doctorRepository.findOneWithDegreesByUser(user).map(doctor -> {
+				.flatMap(user -> doctorRepository.findOneWithProfessionalDegreesByUser(user).map(doctor -> {
 					doctor.setUser(user);
 					return doctor;
 				}));

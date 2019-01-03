@@ -120,7 +120,8 @@ public class AccountResource {
 	@Timed
 	public UserDTO getAccount() {
 		if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.DOCTOR)) {
-			return userService.getDoctorWithAuthoritiesAndDegrees().map(UserDTO::new)
+			return userService
+					.getDoctorWithAuthoritiesAndProfessionalDegrees().map(UserDTO::new)
 					.orElseThrow(() -> new InternalServerErrorException("Doctor could not be found"));
 		} else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.PATIENT)) {
 			return userService.getPatientWithAuthorities().map(UserDTO::new)

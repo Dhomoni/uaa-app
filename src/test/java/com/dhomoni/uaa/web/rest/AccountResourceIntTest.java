@@ -199,7 +199,7 @@ public class AccountResourceIntTest {
         Doctor doctor = new Doctor();
         doctor.setPhone("8888123234355");
         doctor.setType(DoctorType.SURGEON);
-        doctor.setDepartment(1);
+        doctor.setMedicalDepartment(1);
         doctor.setDescription("desc 1");
         doctor.setDesignation("designation 1");
         doctor.setLicenceNumber("1111122222");
@@ -218,7 +218,7 @@ public class AccountResourceIntTest {
         doctor.setProfessionalDegrees(Collections.singleton(professionalDegree));
         doctor.setUser(user);
         
-        when(mockUserService.getDoctorWithAuthoritiesAndDegrees()).thenReturn(Optional.of(doctor));
+        when(mockUserService.getDoctorWithAuthoritiesAndProfessionalDegrees()).thenReturn(Optional.of(doctor));
 
         restUserMockMvc.perform(get("/api/account")
             .accept(MediaType.APPLICATION_JSON))
@@ -237,7 +237,7 @@ public class AccountResourceIntTest {
             .andExpect(jsonPath("$.image").exists())
             .andExpect(jsonPath("$.imageContentType").value(doctor.getImageContentType()))
             .andExpect(jsonPath("$.doctorDTO.type").value(doctor.getType().toString()))
-            .andExpect(jsonPath("$.doctorDTO.department").value(doctor.getDepartment()))
+            .andExpect(jsonPath("$.doctorDTO.medicalDepartment").value(doctor.getMedicalDepartment()))
             .andExpect(jsonPath("$.doctorDTO.description").value(doctor.getDescription()))
             .andExpect(jsonPath("$.doctorDTO.designation").value(doctor.getDesignation()))
             .andExpect(jsonPath("$.doctorDTO.licenceNumber").value(doctor.getLicenceNumber()))
@@ -366,7 +366,7 @@ public class AccountResourceIntTest {
         validDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
         doctorDTO.setType(DoctorType.SURGEON);
-        doctorDTO.setDepartment(1);
+        doctorDTO.setMedicalDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber("434243434155");
@@ -524,7 +524,7 @@ public class AccountResourceIntTest {
         invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
         doctorDTO.setType(DoctorType.SURGEON);
-        doctorDTO.setDepartment(1);
+        doctorDTO.setMedicalDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber("qwe");  // invalid licence number
@@ -585,7 +585,7 @@ public class AccountResourceIntTest {
         invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
         doctorDTO.setType(DoctorType.SURGEON);
-        doctorDTO.setDepartment(1);
+        doctorDTO.setMedicalDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber(null);  // null licence number
@@ -789,7 +789,7 @@ public class AccountResourceIntTest {
         firstDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
         doctorDTO.setType(DoctorType.SURGEON);
-        doctorDTO.setDepartment(1);
+        doctorDTO.setMedicalDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber("434243434155");
@@ -977,7 +977,7 @@ public class AccountResourceIntTest {
         doctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
         doctorDTO.setType(DoctorType.SURGEON);
-        doctorDTO.setDepartment(1);
+        doctorDTO.setMedicalDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber("434243434155");
@@ -1012,7 +1012,7 @@ public class AccountResourceIntTest {
         assertThat(updatedDoctor.getImage()).isEqualTo(doctor.getImage());
         assertThat(updatedDoctor.getImageContentType()).isEqualTo(doctor.getImageContentType());
         assertThat(updatedDoctor.getType()).isEqualTo(doctorDTO.getType());
-        assertThat(updatedDoctor.getDepartment()).isEqualTo(doctorDTO.getDepartment());
+        assertThat(updatedDoctor.getMedicalDepartment()).isEqualTo(doctorDTO.getMedicalDepartment());
         assertThat(updatedDoctor.getDescription()).isEqualTo(doctorDTO.getDescription());
         assertThat(updatedDoctor.getDesignation()).isEqualTo(doctorDTO.getDesignation());
         assertThat(updatedDoctor.getLicenceNumber()).isEqualTo(doctorDTO.getLicenceNumber());

@@ -10,26 +10,13 @@
 	http://www.liquibase.org/xml/ns/dbchangelog-ext/liquibase-spatial 
     http://lonnyj.github.com/liquibase-spatial/liquibase-spatial.xsd">    
     
-    <changeSet author="sdsl (generated)" id="1545137949181-2">
-        <createTable tableName="degree">
-            <column autoIncrement="true" name="id" type="BIGINT">
-                <constraints primaryKey="true" primaryKeyName="degreePK"/>
-            </column>
-            <column name="country" type="VARCHAR(255)"/>
-            <column name="enrollment_year" type="INT"/>
-            <column name="institute" type="VARCHAR(255)"/>
-            <column name="name" type="VARCHAR(255)"/>
-            <column name="passing_year" type="INT"/>
-            <column name="doctor_id" type="UUID"/>
-        </createTable>
-    </changeSet>
     <changeSet author="sdsl (generated)" id="1544017479328-2">
     	<createTable tableName="DOCTOR">
-            <column name="id" type="UUID">
-                <constraints nullable="false"/>
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="type" type="varchar(255)"/>
-            <column name="department" type="INT"/>
+            <column name="medical_department_id" type="INT"/>
             <column name="address" type="VARCHAR(255)"/>
             <column name="description" type="VARCHAR(255)"/>
             <column name="designation" type="VARCHAR(255)"/>
@@ -41,12 +28,35 @@
             <column name="passport_no" type="VARCHAR(255)"/>
             <column name="phone" type="VARCHAR(255)"/>
             <column name="user_id" type="BIGINT"/>
-        </createTable>        
+        </createTable>
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/doctors.csv"
+                  separator=";"
+                  tableName="DOCTOR">
+        </loadData>
+    </changeSet>
+    <changeSet author="sdsl (generated)" id="1545137949181-2">
+        <createTable tableName="professional_degree">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="degreePK"/>
+            </column>
+            <column name="country" type="VARCHAR(255)"/>
+            <column name="enrollment_year" type="INT"/>
+            <column name="institute" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="passing_year" type="INT"/>
+            <column name="doctor_id" type="bigint"/>
+        </createTable>
+		<loadData encoding="UTF-8"
+                  file="config/liquibase/professional_degrees.csv"
+                  separator=";"
+                  tableName="professional_degree">
+        </loadData>
     </changeSet>
     <changeSet author="sdsl (generated)" id="1544017479328-8">
         <createTable tableName="PATIENT">
-            <column name="id" type="UUID">
-                <constraints nullable="false"/>
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="birth_timestamp" type="TIMESTAMP"/>
             <column name="blood_group" type="varchar(255)"/>
@@ -60,6 +70,11 @@
             <column name="phone" type="VARCHAR(255)"/>
             <column name="user_id" type="BIGINT"/>
         </createTable>
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/patients.csv"
+                  separator=";"
+                  tableName="PATIENT">
+        </loadData>
     </changeSet>
     <changeSet author="sdsl (generated)" id="1544017479328-17">
         <addForeignKeyConstraint 
@@ -77,6 +92,15 @@
         	constraintName="fk_patient_user_id" 
         	referencedColumnNames="id" 
         	referencedTableName="jhi_user"
+        	onDelete="CASCADE"/>
+    </changeSet>
+	<changeSet author="pervez" id="1544017479328-19">
+        <addForeignKeyConstraint 
+        	baseColumnNames="doctor_id" 
+        	baseTableName="professional_degree"
+        	constraintName="fk_professional_degree_doctor_id" 
+        	referencedColumnNames="id" 
+        	referencedTableName="DOCTOR"
         	onDelete="CASCADE"/>
     </changeSet>
 </databaseChangeLog>

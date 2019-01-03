@@ -2,7 +2,6 @@ package com.dhomoni.uaa.domain;
 
 import java.io.Serializable;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Pattern;
 
@@ -37,9 +37,9 @@ public class Doctor implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column( columnDefinition = "uuid")
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+    private Long id;
     
     @Pattern(regexp = Constants.PHONE_REGEX)
     private String phone;
@@ -57,8 +57,8 @@ public class Doctor implements Serializable {
     @Column(name = "type")
     private DoctorType type;
     
-    @Column(name = "department")
-    private Integer department;
+    @Column(name = "medical_department_id")
+    private Integer medicalDepartment;
     
     @Column(name = "designation")
     private String designation;

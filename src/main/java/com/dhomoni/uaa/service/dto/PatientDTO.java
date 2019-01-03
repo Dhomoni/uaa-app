@@ -1,7 +1,6 @@
 package com.dhomoni.uaa.service.dto;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import com.dhomoni.uaa.domain.enumeration.BloodGroup;
 import com.dhomoni.uaa.domain.enumeration.Sex;
@@ -11,7 +10,7 @@ import lombok.Data;
 @Data
 public class PatientDTO {
 	
-	private UUID id;
+	private Long id;
 	
     private Instant birthTimestamp;
     

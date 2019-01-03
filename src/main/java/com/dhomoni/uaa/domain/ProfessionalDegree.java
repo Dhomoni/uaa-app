@@ -16,7 +16,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import lombok.Data;
 
 @Entity
-@Table(name = "degree")
+@Table(name = "professional_degree")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @Data
 public class ProfessionalDegree implements Serializable {

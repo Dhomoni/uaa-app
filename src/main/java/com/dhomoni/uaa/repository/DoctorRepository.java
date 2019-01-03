@@ -16,6 +16,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 	
 	Optional<Doctor> findOneByUser(User user);
 	
-	@EntityGraph(attributePaths = "degrees")
-	Optional<Doctor> findOneWithDegreesByUser(User user);
+	@EntityGraph(attributePaths = "professionalDegrees")
+	Optional<Doctor> findOneWithProfessionalDegreesByUser(User user);
 }
