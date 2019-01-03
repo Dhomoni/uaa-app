@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +23,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.dhomoni.uaa.config.Constants;
+import com.dhomoni.uaa.domain.enumeration.DoctorType;
 import com.vividsolutions.jts.geom.Point;
 
 import lombok.Data;
@@ -40,12 +43,6 @@ public class Doctor implements Serializable {
     
     @Pattern(regexp = Constants.PHONE_REGEX)
     private String phone;
-
-    @Column(name = "type")
-    private Integer type;
-    
-    @Column(name = "department")
-    private Integer department;
     
     @Column(name = "licence_number")
     private String licenceNumber;
@@ -56,6 +53,13 @@ public class Doctor implements Serializable {
     @Column(name = "passport_no")
     private String passportNo;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private DoctorType type;
+    
+    @Column(name = "department")
+    private Integer department;
+    
     @Column(name = "designation")
     private String designation;
 
@@ -64,12 +68,12 @@ public class Doctor implements Serializable {
     
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "doctor_id")
-    private Set<Degree> degrees;
+    private Set<ProfessionalDegree> professionalDegrees;
     
     @Column(name = "address")
     private String address;
     
-    @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point,4326)")
+    @Column(name = "GEOM", columnDefinition = "GEOMETRY(Point, 4326)")
     private Point location;
 
     @Lob

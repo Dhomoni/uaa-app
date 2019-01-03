@@ -19,7 +19,7 @@ import lombok.Data;
 @Table(name = "degree")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @Data
-public class Degree implements Serializable {
+public class ProfessionalDegree implements Serializable {
     
 	private static final long serialVersionUID = 1L;
 	

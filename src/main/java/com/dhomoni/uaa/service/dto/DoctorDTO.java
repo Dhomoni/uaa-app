@@ -5,7 +5,8 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.dhomoni.uaa.domain.Degree;
+import com.dhomoni.uaa.domain.ProfessionalDegree;
+import com.dhomoni.uaa.domain.enumeration.DoctorType;
 
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class DoctorDTO {
 	
 	private UUID id;
 	
-    private Integer type;
+    private DoctorType type;
     
     private Integer department;
 	
@@ -31,7 +32,7 @@ public class DoctorDTO {
 
     private String description;
     
-    private Set<Degree> degrees;
+    private Set<ProfessionalDegree> professionalDegrees;
     
     public boolean isLiceceNumberValid() {
 		return !StringUtils.isEmpty(this.licenceNumber) 

@@ -3,8 +3,8 @@ package com.dhomoni.uaa.service.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.dhomoni.uaa.domain.Patient.BloodGroup;
-import com.dhomoni.uaa.domain.Patient.Sex;
+import com.dhomoni.uaa.domain.enumeration.BloodGroup;
+import com.dhomoni.uaa.domain.enumeration.Sex;
 
 import lombok.Data;
 

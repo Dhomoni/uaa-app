@@ -715,11 +715,6 @@
 							<artifactId>liquibase-spatial</artifactId>
 							<version>${liquibase-spatial.version}</version>
 						</dependency>
-						<!-- <dependency> -->
-						<!-- <groupId>org.opengeo</groupId> -->
-						<!-- <artifactId>geodb</artifactId> -->
-						<!-- <version>${geodb.version}</version> -->
-						<!-- </dependency> -->
 						<dependency>
 							<groupId>javax.validation</groupId>
 							<artifactId>validation-api</artifactId>
@@ -945,11 +940,6 @@
 					<artifactId>geodb</artifactId>
 					<version>${geodb.version}</version>
 				</dependency>
-				<!-- <dependency> -->
-				<!-- <groupId>org.orbisgis</groupId> -->
-				<!-- <artifactId>h2gis-functions</artifactId> -->
-				<!-- <version>${h2gis-functions.version}</version> -->
-				<!-- </dependency> -->
 			</dependencies>
 			<build>
 				<plugins>

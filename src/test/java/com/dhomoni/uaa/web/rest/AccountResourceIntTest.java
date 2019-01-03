@@ -44,11 +44,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dhomoni.uaa.UaaApp;
 import com.dhomoni.uaa.config.Constants;
 import com.dhomoni.uaa.domain.Authority;
-import com.dhomoni.uaa.domain.Degree;
+import com.dhomoni.uaa.domain.ProfessionalDegree;
 import com.dhomoni.uaa.domain.Doctor;
 import com.dhomoni.uaa.domain.Patient;
-import com.dhomoni.uaa.domain.Patient.BloodGroup;
-import com.dhomoni.uaa.domain.Patient.Sex;
+import com.dhomoni.uaa.domain.enumeration.BloodGroup;
+import com.dhomoni.uaa.domain.enumeration.DoctorType;
+import com.dhomoni.uaa.domain.enumeration.Sex;
+import com.dhomoni.uaa.domain.ProfessionalDegree;
 import com.dhomoni.uaa.domain.User;
 import com.dhomoni.uaa.repository.AuthorityRepository;
 import com.dhomoni.uaa.repository.DoctorRepository;
@@ -196,7 +198,7 @@ public class AccountResourceIntTest {
         user.setAuthorities(Stream.of(doctorAuth, userAuth).collect(Collectors.toSet()));
         Doctor doctor = new Doctor();
         doctor.setPhone("8888123234355");
-        doctor.setType(1);
+        doctor.setType(DoctorType.SURGEON);
         doctor.setDepartment(1);
         doctor.setDescription("desc 1");
         doctor.setDesignation("designation 1");
@@ -207,13 +209,13 @@ public class AccountResourceIntTest {
         Path imagePath = new ClassPathResource("static/images/pervez.jpg").getFile().toPath();
         doctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         doctor.setImageContentType(Files.probeContentType(imagePath));
-        Degree degree = new Degree();
-        degree.setName("MBBS");
-        degree.setInstitute("Institute");
-        degree.setCountry("Bangladesh");
-        degree.setEnrollmentYear(1990);
-        degree.setPassingYear(1998);
-        doctor.setDegrees(Collections.singleton(degree));
+        ProfessionalDegree professionalDegree = new ProfessionalDegree();
+        professionalDegree.setName("MBBS");
+        professionalDegree.setInstitute("Institute");
+        professionalDegree.setCountry("Bangladesh");
+        professionalDegree.setEnrollmentYear(1990);
+        professionalDegree.setPassingYear(1998);
+        doctor.setProfessionalDegrees(Collections.singleton(professionalDegree));
         doctor.setUser(user);
         
         when(mockUserService.getDoctorWithAuthoritiesAndDegrees()).thenReturn(Optional.of(doctor));
@@ -234,18 +236,18 @@ public class AccountResourceIntTest {
             .andExpect(jsonPath("$.address").value(doctor.getAddress()))
             .andExpect(jsonPath("$.image").exists())
             .andExpect(jsonPath("$.imageContentType").value(doctor.getImageContentType()))
-            .andExpect(jsonPath("$.doctorDTO.type").value(doctor.getType()))
+            .andExpect(jsonPath("$.doctorDTO.type").value(doctor.getType().toString()))
             .andExpect(jsonPath("$.doctorDTO.department").value(doctor.getDepartment()))
             .andExpect(jsonPath("$.doctorDTO.description").value(doctor.getDescription()))
             .andExpect(jsonPath("$.doctorDTO.designation").value(doctor.getDesignation()))
             .andExpect(jsonPath("$.doctorDTO.licenceNumber").value(doctor.getLicenceNumber()))
             .andExpect(jsonPath("$.doctorDTO.passportNo").value(doctor.getPassportNo()))
             .andExpect(jsonPath("$.doctorDTO.nationalId").value(doctor.getNationalId()))
-            .andExpect(jsonPath("$.doctorDTO.degrees[0].name").value(degree.getName()))
-            .andExpect(jsonPath("$.doctorDTO.degrees[0].institute").value(degree.getInstitute()))
-            .andExpect(jsonPath("$.doctorDTO.degrees[0].country").value(degree.getCountry()))
-            .andExpect(jsonPath("$.doctorDTO.degrees[0].enrollmentYear").value(degree.getEnrollmentYear()))
-            .andExpect(jsonPath("$.doctorDTO.degrees[0].passingYear").value(degree.getPassingYear()));
+            .andExpect(jsonPath("$.doctorDTO.professionalDegrees[0].name").value(professionalDegree.getName()))
+            .andExpect(jsonPath("$.doctorDTO.professionalDegrees[0].institute").value(professionalDegree.getInstitute()))
+            .andExpect(jsonPath("$.doctorDTO.professionalDegrees[0].country").value(professionalDegree.getCountry()))
+            .andExpect(jsonPath("$.doctorDTO.professionalDegrees[0].enrollmentYear").value(professionalDegree.getEnrollmentYear()))
+            .andExpect(jsonPath("$.doctorDTO.professionalDegrees[0].passingYear").value(professionalDegree.getPassingYear()));
     }
     
     @Test
@@ -363,20 +365,20 @@ public class AccountResourceIntTest {
         validDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         validDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
-        doctorDTO.setType(1);
+        doctorDTO.setType(DoctorType.SURGEON);
         doctorDTO.setDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber("434243434155");
         doctorDTO.setNationalId("4545646456234");
         doctorDTO.setPassportNo("89787655673423");
-        Degree degree = new Degree();
-        degree.setName("MBBS");
-        degree.setInstitute("Institute");
-        degree.setCountry("Bangladesh");
-        degree.setEnrollmentYear(1990);
-        degree.setPassingYear(1998);
-        doctorDTO.setDegrees(Collections.singleton(degree));
+        ProfessionalDegree professionalDegree = new ProfessionalDegree();
+        professionalDegree.setName("MBBS");
+        professionalDegree.setInstitute("Institute");
+        professionalDegree.setCountry("Bangladesh");
+        professionalDegree.setEnrollmentYear(1990);
+        professionalDegree.setPassingYear(1998);
+        doctorDTO.setProfessionalDegrees(Collections.singleton(professionalDegree));
         validDoctor.setDoctorDTO(doctorDTO);
         assertThat(userRepository.findOneByLogin("test-doctor-register-valid").isPresent()).isFalse();
 
@@ -390,7 +392,7 @@ public class AccountResourceIntTest {
         assertThat(newUser.isPresent()).isTrue();
         Optional<Doctor> newDoctor = doctorRepository.findOneByUser(newUser.get());
         assertThat(newDoctor.isPresent()).isTrue();
-        assertThat(newDoctor.get().getDegrees().size()).isEqualTo(1);
+        assertThat(newDoctor.get().getProfessionalDegrees().size()).isEqualTo(1);
     }
     
     @Test
@@ -521,7 +523,7 @@ public class AccountResourceIntTest {
         invalidDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
-        doctorDTO.setType(1);
+        doctorDTO.setType(DoctorType.SURGEON);
         doctorDTO.setDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
@@ -582,7 +584,7 @@ public class AccountResourceIntTest {
         invalidDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         invalidDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
-        doctorDTO.setType(1);
+        doctorDTO.setType(DoctorType.SURGEON);
         doctorDTO.setDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
@@ -786,7 +788,7 @@ public class AccountResourceIntTest {
         firstDoctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         firstDoctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
-        doctorDTO.setType(1);
+        doctorDTO.setType(DoctorType.SURGEON);
         doctorDTO.setDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
@@ -974,20 +976,20 @@ public class AccountResourceIntTest {
 //        doctor.setImage(Base64.getEncoder().encode(Files.readAllBytes(imagePath)));
         doctor.setImageContentType(Files.probeContentType(imagePath));
         DoctorDTO doctorDTO = new DoctorDTO();        
-        doctorDTO.setType(1);
+        doctorDTO.setType(DoctorType.SURGEON);
         doctorDTO.setDepartment(1);
         doctorDTO.setDescription("Desc");
         doctorDTO.setDesignation("doctor designation");
         doctorDTO.setLicenceNumber("434243434155");
         doctorDTO.setNationalId("4545646456234");
         doctorDTO.setPassportNo("89787655673423");
-        Degree degree = new Degree();
-        degree.setName("MBBS");
-        degree.setInstitute("Institute");
-        degree.setCountry("Bangladesh");
-        degree.setEnrollmentYear(1990);
-        degree.setPassingYear(1998);
-        doctorDTO.setDegrees(Collections.singleton(degree));
+        ProfessionalDegree professionalDegree = new ProfessionalDegree();
+        professionalDegree.setName("MBBS");
+        professionalDegree.setInstitute("Institute");
+        professionalDegree.setCountry("Bangladesh");
+        professionalDegree.setEnrollmentYear(1990);
+        professionalDegree.setPassingYear(1998);
+        doctorDTO.setProfessionalDegrees(Collections.singleton(professionalDegree));
         doctor.setDoctorDTO(doctorDTO);
 
         restMvc.perform(
@@ -1015,7 +1017,7 @@ public class AccountResourceIntTest {
         assertThat(updatedDoctor.getDesignation()).isEqualTo(doctorDTO.getDesignation());
         assertThat(updatedDoctor.getLicenceNumber()).isEqualTo(doctorDTO.getLicenceNumber());
         assertThat(updatedDoctor.getNationalId()).isEqualTo(doctorDTO.getNationalId());
-        assertThat(updatedDoctor.getDegrees().size()).isEqualTo(doctorDTO.getDegrees().size());
+        assertThat(updatedDoctor.getProfessionalDegrees().size()).isEqualTo(doctorDTO.getProfessionalDegrees().size());
         assertThat(updatedDoctor.getPassportNo()).isEqualTo(doctorDTO.getPassportNo());
         assertThat(updatedUser.getAuthorities()).isEqualTo(user.getAuthorities());
     }

@@ -113,7 +113,7 @@ public class UserDTO {
     	this.doctorDTO.setType(doctor.getType());
     	this.doctorDTO.setDepartment(doctor.getDepartment());
     	this.doctorDTO.setDescription(doctor.getDescription());
-    	this.doctorDTO.setDegrees(doctor.getDegrees());
+    	this.doctorDTO.setProfessionalDegrees(doctor.getProfessionalDegrees());
     }
 
     public UserDTO(Patient patient) {

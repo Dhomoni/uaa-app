@@ -1,7 +1,10 @@
 package com.dhomoni.uaa.security;
 
-import com.dhomoni.uaa.domain.User;
-import com.dhomoni.uaa.repository.UserRepository;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +16,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.dhomoni.uaa.domain.User;
+import com.dhomoni.uaa.repository.UserRepository;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * Authenticate a user from the database.
@@ -48,15 +54,13 @@ public class DomainUserDetailsService implements UserDetailsService {
 
     }
 
-    private org.springframework.security.core.userdetails.User createSpringSecurityUser(String lowercaseLogin, User user) {
+    private UserDetails createSpringSecurityUser(String lowercaseLogin, User user) {
         if (!user.getActivated()) {
             throw new UserNotActivatedException("User " + lowercaseLogin + " was not activated");
         }
         List<GrantedAuthority> grantedAuthorities = user.getAuthorities().stream()
             .map(authority -> new SimpleGrantedAuthority(authority.getName()))
             .collect(Collectors.toList());
-        return new org.springframework.security.core.userdetails.User(user.getLogin(),
-            user.getPassword(),
-            grantedAuthorities);
+        return new CustomUser(user.getLogin(), user.getPassword(), grantedAuthorities, user.getId());
     }
 }

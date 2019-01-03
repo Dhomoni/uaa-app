@@ -187,7 +187,7 @@ public class UserService {
 			newDoctor.setPassportNo(doctorDTO.getPassportNo());
 			newDoctor.setDesignation(doctorDTO.getDesignation());
 			newDoctor.setDescription(doctorDTO.getDescription());
-			newDoctor.setDegrees(doctorDTO.getDegrees());
+			newDoctor.setProfessionalDegrees(doctorDTO.getProfessionalDegrees());
 		});
 		newDoctor.setUser(newUser);
 		doctorRepository.save(newDoctor);
@@ -308,7 +308,7 @@ public class UserService {
 			doctor.setPassportNo(doctorDTO.getPassportNo());
 			doctor.setDesignation(doctorDTO.getDesignation());
 			doctor.setDescription(doctorDTO.getDescription());
-			doctor.setDegrees(doctorDTO.getDegrees());
+			doctor.setProfessionalDegrees(doctorDTO.getProfessionalDegrees());
 		});
 		doctor.setUser(user);
 		doctorRepository.save(doctor);

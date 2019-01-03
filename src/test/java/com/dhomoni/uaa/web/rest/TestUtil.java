@@ -52,7 +52,6 @@ public class TestUtil {
         mapper.registerModule(jtsModule);
         Jdk8Module jdk8Module = new Jdk8Module();
         mapper.registerModule(jdk8Module);
-        String t = mapper.writeValueAsString(object);
         return mapper.writeValueAsBytes(object);
     }
 
