@@ -247,7 +247,30 @@ delete from jhi_user where login = 'pervez';
 delete from degree;
 ```
 
+### Git operations:
+```
+git branch <feature_branch>
+git checkout <feature_branch>
+git add . 
+git commit -m "adding a change from the feature branch"
+git checkout master
+git push origin <feature_branch>
 
+To clear all changes since the last commit I do
+git reset --hard
+git clean -fd
+If I've done that but I also need to back out the previous commit then I do
+git reset --hard HEAD~1
+
+```
+
+## Miscellaneous
+@Lob text field should not be inserted via liquibase. Otherwise, hibernate won't pick up the value correctly later on.
+```
+    @Lob
+    @Column(name = "description")
+    private String description;
+```
 
 
 ## Building for production
