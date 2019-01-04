@@ -247,7 +247,16 @@ delete from jhi_user where login = 'pervez';
 delete from degree;
 ```
 
+### Git operations:
+```
+git branch <feature_branch>
+git checkout <feature_branch>
+git add . 
+git commit -m "adding a change from the feature branch"
+git checkout master
+git push origin <feature_branch>
 
+```
 
 
 ## Building for production
