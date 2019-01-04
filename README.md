@@ -256,6 +256,12 @@ git commit -m "adding a change from the feature branch"
 git checkout master
 git push origin <feature_branch>
 
+To clear all changes since the last commit I do
+git reset --hard
+git clean -fd
+If I've done that but I also need to back out the previous commit then I do
+git reset --hard HEAD~1
+
 ```
 
 
