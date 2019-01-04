@@ -1,2 +1,2 @@
-id;type;medical_department_id;address;description;designation;licence_number;national_id;passport_no;phone;user_id
-1;PHYSICIAN;2;pahartoli resedential area;desc;Assistant Professor;1111111111;1111111111;1111111111;8801111111111;5
+id;type;medical_department_id;address;designation;licence_number;national_id;passport_no;phone;user_id
+1;PHYSICIAN;2;pahartoli resedential area;Assistant Professor;1111111111;1111111111;1111111111;8801111111111;5

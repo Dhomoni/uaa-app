@@ -63,6 +63,7 @@ public class Doctor implements Serializable {
     @Column(name = "designation")
     private String designation;
 
+    @Lob
     @Column(name = "description")
     private String description;
     
