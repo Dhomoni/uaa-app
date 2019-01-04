@@ -264,6 +264,14 @@ git reset --hard HEAD~1
 
 ```
 
+## Miscellaneous
+@Lob text field should not be inserted via liquibase. Otherwise, hibernate won't pick up the value correctly later on.
+```
+    @Lob
+    @Column(name = "description")
+    private String description;
+```
+
 
 ## Building for production
 
