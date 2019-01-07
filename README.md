@@ -173,6 +173,9 @@ export const AUTHORITIES = {
 02. Install STS
 
 03. Install npm
+        $ sudo apt update
+        $ sudo apt install nodejs
+        $ sudo apt install npm
 
 04. Install docker
 
@@ -180,13 +183,14 @@ export const AUTHORITIES = {
 		$ sudo apt install docker-compose
 
 06. Install jhipster :
-		$ npm install -g generator-jhipster
+		$ sudo npm install -g generator-jhipster
 
 07. Build postgresql-postgis docker image :
 		$ cd uaa-app/src/main/docker/postgis/
 		$ docker build -t postgresql-postgis:10.6 .   
 
 08. Pull and Deploy sonar :
+        $ cd uaa-app
 		$ docker-compose -f src/main/docker/sonar.yml up -d	
 
 09. Build and deploy uaa-app :
