@@ -201,8 +201,8 @@ export const AUTHORITIES = {
 
 11. Build and deploy gateway-app :
         $ cd gateway-app/
-        $ npm install
-        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ sudo npm install
+        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
         $ docker-compose -f src/main/docker/app.yml up
 
 12. Build and deploy diagnosys-app :
