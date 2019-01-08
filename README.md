@@ -207,12 +207,12 @@ export const AUTHORITIES = {
 
 12. Build and deploy diagnosys-app :
         $ cd diagnosys-app/
-        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
         $ docker-compose -f src/main/docker/app.yml up
 
 13. Build and deploy search-app :
         $ cd search-app/
-        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
         $ docker-compose -f src/main/docker/app.yml up
 
 14. Additional development notes :
