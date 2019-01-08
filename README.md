@@ -171,6 +171,7 @@ export const AUTHORITIES = {
 01. Install Java
 
 02. Install STS
+        - Install jHipster IDE plugin in STS
 
 03. Install npm
         $ sudo apt update
