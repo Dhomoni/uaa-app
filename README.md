@@ -165,6 +165,12 @@ export const AUTHORITIES = {
         return mapper.writeValueAsBytes(object);
     }
 ```
+### create index:
+```
+https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elasticsearch-reindexer
+1. curl -X POST --data "username=admin&password=admin&grant_type=password&scope=openid" http://web_app:changeit@172.18.0.7:9999/oauth/token
+2. curl -X POST -H "Authorization: Bearer <access_token>" "http://172.18.0.13:8081/api/elasticsearch/index"
+```
 
 ### Notes on development environment:
 ```
