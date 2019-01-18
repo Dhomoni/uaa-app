@@ -172,6 +172,13 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
 2. curl -X POST -H "Authorization: Bearer <access_token>" "http://172.18.0.13:8081/api/elasticsearch/index"
 ```
 
+### add index creator support to new microservice:
+```
+https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elasticsearch-reindexer
+1. npm install -g generator-jhipster-elasticsearch-reindexer
+2. yo jhipster-elasticsearch-reindexer
+```
+
 ### Notes on development environment:
 ```
 01. Install Java
