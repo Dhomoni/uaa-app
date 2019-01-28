@@ -249,6 +249,10 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
     
     To clear liquibase changelog checksum :
         $ docker rm $(docker ps -a -q)
+    To add jhipster-registry in hosts file
+        $ sudo vim /etc/hosts
+        127.0.0.1       jhipster-registr
+        
 ```
 ```
 Helpful commands for docker:
