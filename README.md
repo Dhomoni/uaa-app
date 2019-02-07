@@ -288,6 +288,11 @@ If I've done that but I also need to back out the previous commit then I do
 git reset --hard HEAD~1
 
 ```
+### Build Generator-Jhipster from source:
+```
+https://github.com/jhipster/generator-jhipster/blob/master/CONTRIBUTING.md#setup
+```
+
 
 ## Miscellaneous
 @Lob text field should not be inserted via liquibase. Otherwise, hibernate won't pick up the value correctly later on.
