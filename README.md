@@ -183,6 +183,9 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
 ```
 01. Install Java
 
+** Install git
+        - sudo apt install git
+
 02. Install STS
         - Install jHipster IDE plugin in STS
 
