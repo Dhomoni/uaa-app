@@ -193,8 +193,8 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
         $ sudo apt update
         $ sudo apt install nodejs
         $ sudo apt install npm
-        $ npm install -g npm
-        $ npm install -g yo
+        $ sudo npm install -g npm
+        $ sudo npm install -g yo
 
 04. Install docker
         $ sudo snap install docker
