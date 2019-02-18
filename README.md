@@ -207,32 +207,37 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
 
 07. Build postgresql-postgis docker image :
         $ cd uaa-app/src/main/docker/postgis/
-        $ sudo docker build -t postgresql-postgis:10.6 .   
+        $ docker build -t postgresql-postgis:10.6 .   
 
-08. Pull and Deploy sonar :
+08. docker command without sudo :
+        $ sudo groupadd docker
+        $ sudo gpasswd -a $USER docker
+        $ newgrp docker
+
+09. Pull and Deploy sonar :
         $ cd uaa-app
-        $ sudo docker-compose -f src/main/docker/sonar.yml up -d	
+        $ docker-compose -f src/main/docker/sonar.yml up -d	
 
-09. Build and deploy uaa-app :
+10. Build and deploy uaa-app :
         $ cd uaa-app/
-        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
-        $ sudo docker-compose -f src/main/docker/app.yml up
+        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ docker-compose -f src/main/docker/app.yml up
 
 11. Build and deploy gateway-app :
         $ cd gateway-app/
-        $ sudo npm install
-        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
-        $ sudo docker-compose -f src/main/docker/app.yml up
+        $ npm install
+        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ docker-compose -f src/main/docker/app.yml up
 
 12. Build and deploy diagnosys-app :
         $ cd diagnosys-app/
-        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
-        $ sudo docker-compose -f src/main/docker/app.yml up
+        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ docker-compose -f src/main/docker/app.yml up
 
 13. Build and deploy search-app :
         $ cd search-app/
-        $ sudo ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
-        $ sudo docker-compose -f src/main/docker/app.yml up
+        $ ./mvnw clean package -Pprod sonar:sonar jib:dockerBuild
+        $ docker-compose -f src/main/docker/app.yml up
 
 14. Additional development notes :
     To generate brand new microeservice app from jdl(example):
