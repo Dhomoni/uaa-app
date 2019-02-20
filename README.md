@@ -207,7 +207,7 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
 
 07. Build postgresql-postgis docker image :
         $ cd uaa-app/src/main/docker/postgis/
-        $ docker build -t postgresql-postgis:10.6 .   
+        $ docker build -t postgresql-postgis:10.7 .   
 
 08. docker command without sudo :
         $ sudo groupadd docker
