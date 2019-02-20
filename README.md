@@ -245,9 +245,6 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
        
     To remove files with wildcard search:
         find . -name *WeeklyVisitingHour* -exec rm -rf {} +
-
-    To build docker image of postgres with postgis :
-        docker build -t postgresql-postgis:10.6 .
 	
     In development you may need this for quick web debug :
         $ npm start
