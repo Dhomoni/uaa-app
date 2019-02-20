@@ -1,7 +1,7 @@
 version: '2'
 services:
     uaa-postgresql:
-        image: postgresql-postgis:10.6
+        image: postgresql-postgis:10.7
         environment:
             - POSTGRES_USER=uaa
             - POSTGRES_PASSWORD=
