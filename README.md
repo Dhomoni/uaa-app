@@ -196,6 +196,7 @@ https://www.jhipster.tech/modules/marketplace/#/details/generator-jhipster-elast
         $ sudo npm install -g npm
         $ sudo npm install -g yo
         $ npm install -g generator-jhipster-elasticsearch-reindexer
+        $ yo jhipster-elasticsearch-reindexer
 
 04. Install docker
         $ sudo snap install docker
