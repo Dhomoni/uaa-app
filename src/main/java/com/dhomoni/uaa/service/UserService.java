@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ import com.dhomoni.uaa.repository.search.UserSearchRepository;
 import com.dhomoni.uaa.security.AuthoritiesConstants;
 import com.dhomoni.uaa.security.SecurityUtils;
 import com.dhomoni.uaa.service.dto.UserDTO;
+import com.dhomoni.uaa.service.channel.ProducerChannel;
 import com.dhomoni.uaa.service.dto.DoctorDTO;
 import com.dhomoni.uaa.service.util.RandomUtil;
 import com.dhomoni.uaa.web.rest.errors.DoctorDataNotFoundException;
@@ -65,10 +68,12 @@ public class UserService {
 	private final AuthorityRepository authorityRepository;
 
 	private final CacheManager cacheManager;
+	
+	private final MessageChannel channel;
 
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserSearchRepository userSearchRepository, 
     		DoctorRepository doctorRepository, PatientRepository patientRepository,
-    		AuthorityRepository authorityRepository, CacheManager cacheManager) {
+    		AuthorityRepository authorityRepository, CacheManager cacheManager, ProducerChannel channel) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userSearchRepository = userSearchRepository;
@@ -76,6 +81,7 @@ public class UserService {
         this.doctorRepository = doctorRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
+        this.channel = channel.messageChannel();
     }
 
 	public Optional<User> activateRegistration(String key) {
@@ -86,6 +92,19 @@ public class UserService {
 			user.setActivationKey(null);
 			userSearchRepository.save(user);
 			this.clearUserCaches(user);
+	        if(user.isDoctor()) {
+	        	doctorRepository.findOneWithProfessionalDegreesByUser(user).ifPresent(doctor -> {
+	        		doctor.setUser(user);
+	        		channel.send(MessageBuilder.withPayload(doctor)
+	        				.setHeader("authority", AuthoritiesConstants.DOCTOR).build());
+	        	});
+	        } else if(user.isPatient()) {
+	        	patientRepository.findOneByUser(user).ifPresent(patient -> {
+	        		patient.setUser(user);
+	        		channel.send(MessageBuilder.withPayload(patient)
+	        				.setHeader("authority", AuthoritiesConstants.PATIENT).build());
+	        	});
+	        }
 			log.debug("Activated user: {}", user);
 			return user;
 		});

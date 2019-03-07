@@ -12,6 +12,9 @@ import org.springframework.integration.annotation.Poller;
 import org.springframework.integration.core.MessageSource;
 import org.springframework.messaging.support.GenericMessage;
 
+import com.dhomoni.uaa.service.channel.ConsumerChannel;
+import com.dhomoni.uaa.service.channel.ProducerChannel;
+
 /**
  * Configures Spring Cloud Stream support.
  *
@@ -20,7 +23,7 @@ import org.springframework.messaging.support.GenericMessage;
  * See http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/
  * for the official Spring Cloud Stream documentation.
  */
-@EnableBinding(value = { Source.class })
+@EnableBinding(value = { Source.class, ProducerChannel.class, ConsumerChannel.class })
 public class MessagingConfiguration {
 
     @Value("${spring.application.name:JhipsterService}")

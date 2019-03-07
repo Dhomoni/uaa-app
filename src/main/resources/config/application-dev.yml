@@ -49,6 +49,11 @@ spring:
             bindings:
                 output:
                     destination: topic-jhipster
+                messageChannel:
+                    destination: users
+                    content-type: application/json
+                subscribableChannel:
+                    destination: users
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:h2:file:./target/h2db/db/uaa;DB_CLOSE_DELAY=-1

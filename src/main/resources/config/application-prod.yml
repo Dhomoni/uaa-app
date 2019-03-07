@@ -41,6 +41,11 @@ spring:
             bindings:
                 output:
                     destination: topic-jhipster
+                messageChannel:
+                    destination: users
+                    content-type: application/json
+                subscribableChannel:
+                    destination: users
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
         url: jdbc:postgresql://localhost:5432/uaa
