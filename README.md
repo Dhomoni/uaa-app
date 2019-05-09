@@ -32,6 +32,9 @@ ROLE_DOCTOR
 
 5. Add role to src/main/java/com/dhomoni/gateway/security/AuthoritiesConstants.java
     public static final String DOCTOR = "ROLE_DOCTOR";
+    
+6. Add code to src/main/java/com/dhomoni/gateway/config/SecurityConfiguration.java
+     .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
 
 6. Login with username: doctor and password: user
 
